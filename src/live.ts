@@ -32,7 +32,7 @@ export class EventHistory {
     return true;
   }
 }
-export const liveBlocker = 'Canlı mod bloke: şema sürümü, olay türleri ve polling kuralı henüz doğrulanmadı.';
+export const liveBlocker = 'Live mode blocked: schema version, event types, and polling rules have not been verified.';
 export type LiveState = 'blocked' | 'loading' | 'ready' | 'empty' | 'unavailable' | 'stale' | 'error' | 'rate-limited';
 export interface HttpDiagnostic { httpStatus?: number; apiError?: string }
 export interface LiveSnapshot extends HttpDiagnostic { state: LiveState; message: string; events: LiveEvent[]; lastChecked?: number }
@@ -40,20 +40,20 @@ function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 export function parseEvents(value: unknown, contract: LiveContract): LiveEvent[] | null {
-  if (!record(value) || value.schemaVersion !== contract.schemaVersion) throw new Error('Desteklenmeyen şema sürümü.');
+  if (!record(value) || value.schemaVersion !== contract.schemaVersion) throw new Error('Unsupported schema version.');
   if (value.status === 'unavailable') return null;
-  if (value.status !== 'available') throw new Error('Geçersiz API durumu.');
+  if (value.status !== 'available') throw new Error('Invalid API status.');
   if (value.category !== 'all' || !Array.isArray(value.activeEventTypes) ||
       !value.activeEventTypes.every(type => typeof type === 'string')) {
-    throw new Error('Olay kategorisi veya aktif tür listesi geçersiz.');
+    throw new Error('Invalid event category or active event type list.');
   }
-  if (!Array.isArray(value.events)) throw new Error('Olay listesi geçersiz.');
+  if (!Array.isArray(value.events)) throw new Error('Invalid event list.');
   return value.events.map(event => {
     if (!record(event) || typeof event.id !== 'string' || !event.id ||
         typeof event.type !== 'string' || !event.type || typeof event.occurredAt !== 'string' ||
         !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(event.occurredAt) || !Number.isFinite(Date.parse(event.occurredAt)) ||
         typeof event.eventVersion !== 'number' || !Number.isInteger(event.eventVersion) || event.eventVersion < 1) {
-      throw new Error('Olay alanları geçersiz.');
+      throw new Error('Invalid event fields.');
     }
     return { id: event.id, type: event.type, occurredAt: event.occurredAt, eventVersion: event.eventVersion };
   });
@@ -88,7 +88,7 @@ class HttpRequestError extends Error {
   httpStatus: number;
   apiError?: string;
   constructor(status: number, code?: string) {
-    super(`API isteği reddedildi: HTTP ${status}${code ? ` / ${code}` : ''}. Otomatik tekrar için bekleniyor; demo açılmadı.`);
+    super(`API request rejected: HTTP ${status}${code ? ` / ${code}` : ''}. Waiting to retry automatically. Demo mode was not enabled.`);
     this.httpStatus = status;
     this.apiError = code;
   }
@@ -117,7 +117,7 @@ export class LiveDataProvider {
     this.running = true;
     let timer: ReturnType<typeof setTimeout>;
     let failures = 0;
-    let current: LiveSnapshot = { state: 'loading', message: 'Canlı veriye bağlanılıyor.', events: [] };
+    let current: LiveSnapshot = { state: 'loading', message: 'Connecting to live data.', events: [] };
     onSnapshot(current);
     const publish = (state: LiveState, message: string, events: LiveEvent[] = [], diagnostic: HttpDiagnostic = {}) => {
       current = { state, message, events, lastChecked: this.lastChecked, ...diagnostic };
@@ -126,7 +126,7 @@ export class LiveDataProvider {
     const staleTimer = setInterval(() => {
       if (this.lastChecked !== undefined && Date.now() - this.lastChecked >= c.staleMs && current.state !== 'stale') {
         this.baseline = false;
-        publish('stale', `Son veri kontrolü gecikti; bildirimler durduruldu.${current.httpStatus ? ` Son hata: HTTP ${current.httpStatus}${current.apiError ? ` / ${current.apiError}` : ''}.` : ''}`, [], {httpStatus:current.httpStatus, apiError:current.apiError});
+        publish('stale', `The last data check is overdue. Notifications are paused.${current.httpStatus ? ` Last error: HTTP ${current.httpStatus}${current.apiError ? ` / ${current.apiError}` : ''}.` : ''}`, [], {httpStatus:current.httpStatus, apiError:current.apiError});
       }
     }, Math.min(c.staleMs, 1000));
     const poll = async () => {
@@ -144,14 +144,14 @@ export class LiveDataProvider {
           delay = retryDelay(response.headers.get('Retry-After'), Date.now(), Math.min(c.pollMs * 2 ** Math.min(failures, 6), 3600000));
           this.baseline = false;
           const code = await readApiError(response);
-          publish(response.status === 429 ? 'rate-limited' : 'unavailable', `HTTP ${response.status}${code ? ` / ${code}` : ''}; yeniden denemeden önce bekleniyor.`, [], {httpStatus:response.status,apiError:code});
+          publish(response.status === 429 ? 'rate-limited' : 'unavailable', `HTTP ${response.status}${code ? ` / ${code}` : ''}; waiting before retrying.`, [], {httpStatus:response.status,apiError:code});
         } else {
           if (response.status !== 304 && !response.ok) throw new HttpRequestError(response.status, await readApiError(response));
           const events = response.status === 304 ? this.cache : parseEvents(await response.json(), c);
-          if (response.status === 304 && !this.cache) throw new Error('304 için geçerli önbellek yok.');
+          if (response.status === 304 && !this.cache) throw new Error('No valid cache for a 304 response.');
           if (!events) {
             this.cache = null; this.etag = null; this.baseline = false;
-            publish('unavailable', 'API veriyi şu an sunamıyor; bildirim yok.');
+            publish('unavailable', 'The API cannot provide data right now. Notifications are paused.');
           } else {
             const newEvents: LiveEvent[] = [];
             for (const event of [...events].sort((a,b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt))) {
@@ -162,7 +162,7 @@ export class LiveDataProvider {
             this.cache = events;
             this.etag = response.status === 304 ? this.etag : response.headers.get('ETag');
             this.lastChecked = Date.now(); failures = 0;
-            publish(events.length ? 'ready' : 'empty', events.length ? 'Son kontrol başarılı.' : 'Henüz olay yok.', newEvents.slice(-5));
+            publish(events.length ? 'ready' : 'empty', events.length ? 'Last check successful.' : 'No events yet.', newEvents.slice(-5));
           }
         }
       } catch (error) {
@@ -170,7 +170,7 @@ export class LiveDataProvider {
         failures++;
         this.baseline = false;
         delay = Math.min(c.pollMs * 2 ** Math.min(failures, 6), 3600000);
-        publish('error', error instanceof HttpRequestError ? error.message : 'API verisi alınamadı veya doğrulanamadı. Ağ/CORS veya yanıt biçimi incelenmeli; neden henüz doğrulanmadı. Demo açılmadı.', [], error instanceof HttpRequestError ? {httpStatus:error.httpStatus,apiError:error.apiError} : {});
+        publish('error', error instanceof HttpRequestError ? error.message : 'Could not fetch or validate API data. Check the network/CORS settings or response format. The cause has not been verified. Demo mode was not enabled.', [], error instanceof HttpRequestError ? {httpStatus:error.httpStatus,apiError:error.apiError} : {});
       } finally {
         clearTimeout(timeout);
         if (this.running) timer = setTimeout(poll, Math.min(delay, 2147483647));

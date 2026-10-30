@@ -19,9 +19,9 @@ export const defaults: Settings = {
 export const storageKey = 'squeek-companion.settings.v1';
 
 export function parseSettings(raw: string): Settings {
-  if (raw.length > 1500) throw new Error('Ayar bağlantısı çok uzun.');
+  if (raw.length > 1500) throw new Error('Settings link is too long.');
   const value: unknown = JSON.parse(raw);
-  if (!value || typeof value !== 'object') throw new Error('Ayar biçimi geçersiz.');
+  if (!value || typeof value !== 'object') throw new Error('Invalid settings format.');
   const s = value as Record<string, unknown>;
   const allowed = Object.keys(defaults);
   if (Object.keys(s).some(key => !allowed.includes(key)) ||
@@ -31,7 +31,7 @@ export function parseSettings(raw: string): Settings {
       !positions.includes(s.position as Position) ||
       typeof s.fontSize !== 'number' || !Number.isInteger(s.fontSize) ||
       s.fontSize < 16 || s.fontSize > 36) {
-    throw new Error('Ayarlar geçersiz veya sürüm desteklenmiyor. Panelden yeni URL oluştur.');
+    throw new Error('Invalid settings or unsupported version. Create a new URL from the panel.');
   }
   // Missing new fields migrate old v1 URLs/settings without losing appearance.
   const duration = s.duration === undefined ? defaults.duration : s.duration;
@@ -40,7 +40,7 @@ export function parseSettings(raw: string): Settings {
   const milestone = s.milestone === undefined ? defaults.milestone : s.milestone;
   if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 3 || duration > 10 ||
       typeof gap !== 'number' || !Number.isInteger(gap) || gap < 0 || gap > 30 ||
-      typeof settlement !== 'boolean' || typeof milestone !== 'boolean') throw new Error('Bildirim ayarları geçersiz.');
+      typeof settlement !== 'boolean' || typeof milestone !== 'boolean') throw new Error('Invalid notification settings.');
   return { version: 1, mode: s.mode, theme: s.theme, color: s.color,
     position: s.position as Position, fontSize: s.fontSize, duration, gap, settlement, milestone };
 }

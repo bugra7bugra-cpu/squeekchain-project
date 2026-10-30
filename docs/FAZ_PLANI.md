@@ -223,3 +223,7 @@ Yerel üretim çıktısında Playwright + Chrome: panelden Arena erişimi, klavy
 Preview hazırlığı mevcut; bu ortamda Vercel CLI/oturum/proje bağlantısı veya VERCEL değişkeni yok. Otomatik deployment kapalı ve Production build koruması korunuyor. Kullanıcı mevcut projeye yetkili hesapla yalnızca Preview yayınlayabilir; README yönergesi var. Gerçek OBS Interact ve canlı olay etkisi, sunucu hata incelemesi, güncel başvuru koşulları açık. Main merge, Production ve Genesis gönderimi yapılmadı.
 
 Son kalite kapısı: 35/35 birim testi, TypeScript, ESLint, üretim build ve diff kontrolü başarılı. npm audit --omit=dev: 0 zafiyet. Arena + overlay Chromium etkileşim/regresyon testleri başarılı.
+
+## Onaylı arayüz dil düzenlemesi
+
+Panel, /overlay ve /arena görünür metinleri, erişilebilirlik etiketleri, demo olayları, hata mesajları ve OBS yönergeleri İngilizceye çevrildi. HTML dili en, saat biçimi en-US oldu. Oyun/API davranışı değiştirilmedi. 35 test, TypeScript, lint, build ve Arena/overlay Chromium kontrolleri geçti. Gerçek API/OBS kanıtı ve HTTP 400 engeli aynı durumda; deploy/merge/başvuru yapılmadı.

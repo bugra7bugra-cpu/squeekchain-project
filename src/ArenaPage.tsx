@@ -2,7 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {boost,createGame,step} from './arena';
 import {useLive} from './useLive';
 import './arena.css';
-const directions = [{label:'Yukarı',key:'ArrowUp',symbol:'↑'},{label:'Sol',key:'ArrowLeft',symbol:'←'},{label:'Aşağı',key:'ArrowDown',symbol:'↓'},{label:'Sağ',key:'ArrowRight',symbol:'→'}];
+const directions = [{label:'Up',key:'ArrowUp',symbol:'↑'},{label:'Left',key:'ArrowLeft',symbol:'←'},{label:'Down',key:'ArrowDown',symbol:'↓'},{label:'Right',key:'ArrowRight',symbol:'→'}];
 export function Arena(){
  const [game,setGame]=useState(createGame);
  const [demo,setDemo]=useState(true);
@@ -28,14 +28,14 @@ export function Arena(){
   return()=>{clearInterval(timer);window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',pause);document.removeEventListener('visibilitychange',visibility);};
  },[]);
  const reset=()=>{keys.current.clear();setGame(createGame());};
- return <main className="arena"><a href="/">← Yayın paneli</a><h1>Hamster Event Arena</h1><p id="arena-help">60 saniyede tohumları topla. Ok tuşları / WASD veya yön düğmelerini basılı tut. Klavye için oyun alanına odaklan.</p>
- <label>Olay kaynağı <select value={demo?'demo':'live'} onChange={e=>{setDemo(e.target.value==='demo');reset();}}><option value="demo">DEMO — örnek olaylar</option><option value="live">Canlı API</option></select></label>
- <p role="status">{demo?'DEMO — bonusları örnek olay düğmeleriyle tetikle.':live.message+' Oyun bağlantıdan bağımsız oynanır.'}</p>
- <p className="arena-score">Puan: <strong data-testid="score">{game.score}</strong> · Kalan: <span data-testid="time">{Math.ceil(game.time)}</span> sn · <span role="status">{game.time<=0?'Tur bitti':game.running?'Oynanıyor':'Hazır / duraklatıldı'}</span></p>
- <p>Puan ×{game.bonus>0?2:1} ({Math.ceil(game.bonus)} sn) · Hız {game.speed>0?'güçlendirilmiş':'normal'} ({Math.ceil(game.speed)} sn)</p>
- <div ref={field} tabIndex={0} role="group" aria-label="Hamster oyun alanı" aria-describedby="arena-help" className="arena-field"><span className="arena-seed" aria-label="Tohum" style={{left:game.targetX+'%',top:game.targetY+'%'}}>🌻</span><span className="arena-hamster" aria-label="Hamster" style={{left:game.x+'%',top:game.y+'%'}}>🐹</span></div>
- <div className="arena-actions"><button disabled={game.time<=0} onClick={()=>{keys.current.clear();setGame(g=>({...g,running:!g.running}));field.current?.focus();}}>{game.running?'Duraklat':'Başlat / devam et'}</button><button onClick={reset}>Yeniden başlat</button></div>
- <div className="arena-actions" aria-label="Yön kontrolleri">{directions.map(({label,key,symbol})=><button className="arena-direction" key={key} aria-label={label} disabled={!game.running} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);keys.current.add(key);}} onPointerUp={()=>keys.current.delete(key)} onPointerCancel={()=>keys.current.delete(key)} onLostPointerCapture={()=>keys.current.delete(key)} onKeyDown={e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();keys.current.add(key);}}} onKeyUp={()=>keys.current.delete(key)} onBlur={()=>keys.current.delete(key)}>{symbol}</button>)}</div>
- {demo&&<div className="arena-actions"><button disabled={!game.running} onClick={()=>setGame(g=>boost(g,'system.settlement_completed'))}>DEMO: 8 sn çift puan</button><button disabled={!game.running} onClick={()=>setGame(g=>boost(g,'measurement.daily_distance_milestone'))}>DEMO: 8 sn hız</button></div>}
- <p>OBS: Tarayıcı Kaynağı → /arena → sağ tık → Etkileşim (Interact). Odak kaybolunca oyun duraklar. Gerçek OBS ve canlı olay testi beklemede.</p></main>;
+ return <main className="arena"><a href="/">← Stream control panel</a><h1>Hamster Event Arena</h1><p id="arena-help">Collect seeds in 60 seconds. Use arrow keys / WASD or hold the direction buttons. Focus the game area to use the keyboard.</p>
+ <label>Event source <select value={demo?'demo':'live'} onChange={e=>{setDemo(e.target.value==='demo');reset();}}><option value="demo">DEMO — sample events</option><option value="live">Live API</option></select></label>
+ <p role="status">{demo?'DEMO — trigger bonuses with the sample event buttons.':live.message+' You can play without an API connection.'}</p>
+ <p className="arena-score">Score: <strong data-testid="score">{game.score}</strong> · Time left: <span data-testid="time">{Math.ceil(game.time)}</span> s · <span role="status">{game.time<=0?'Round over':game.running?'Playing':'Ready / paused'}</span></p>
+ <p>Score ×{game.bonus>0?2:1} ({Math.ceil(game.bonus)} s) · Speed {game.speed>0?'boosted':'normal'} ({Math.ceil(game.speed)} s)</p>
+ <div ref={field} tabIndex={0} role="group" aria-label="Hamster game area" aria-describedby="arena-help" className="arena-field"><span className="arena-seed" aria-label="Seed" style={{left:game.targetX+'%',top:game.targetY+'%'}}>🌻</span><span className="arena-hamster" aria-label="Hamster" style={{left:game.x+'%',top:game.y+'%'}}>🐹</span></div>
+ <div className="arena-actions"><button disabled={game.time<=0} onClick={()=>{keys.current.clear();setGame(g=>({...g,running:!g.running}));field.current?.focus();}}>{game.running?'Pause':'Start / resume'}</button><button onClick={reset}>Restart</button></div>
+ <div className="arena-actions" aria-label="Direction controls">{directions.map(({label,key,symbol})=><button className="arena-direction" key={key} aria-label={label} disabled={!game.running} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);keys.current.add(key);}} onPointerUp={()=>keys.current.delete(key)} onPointerCancel={()=>keys.current.delete(key)} onLostPointerCapture={()=>keys.current.delete(key)} onKeyDown={e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();keys.current.add(key);}}} onKeyUp={()=>keys.current.delete(key)} onBlur={()=>keys.current.delete(key)}>{symbol}</button>)}</div>
+ {demo&&<div className="arena-actions"><button disabled={!game.running} onClick={()=>setGame(g=>boost(g,'system.settlement_completed'))}>DEMO: 8s double score</button><button disabled={!game.running} onClick={()=>setGame(g=>boost(g,'measurement.daily_distance_milestone'))}>DEMO: 8s speed boost</button></div>}
+ <p>OBS: Browser Source → /arena → right-click → Interact. The game pauses when focus is lost. Real OBS and live event testing are pending.</p></main>;
 }
