@@ -186,3 +186,10 @@ Yapılacaklar:
 Bu dosyaları GitHub deposuna koyduktan sonra şunu gönder:
 
 > Depodaki AGENTS.md ve docs/FAZ_PLANI.md dosyalarını oku. Şimdilik kod yazma, paket kurma, commit/push yapma veya işlem gönderme. Sadece Faz 1'i salt-okunur araştırma olarak ele al: The Tester rozetinin güncel şartlarını ve resmî Squeekchain belgelerinden doğrulanabilir, güvenli işlem seçeneklerini araştır. Sözleşme adresi veya ABI uydurma. İşlem gerekiyorsa ne yapılacağını ve simülasyon adımlarını açıkla, ama benim açık onayım olmadan hiçbir işlem hazırlayıp imzalamaya veya göndermeye çalışma. Sonucu sade Türkçe anlat ve Faz 2'ye geçme.
+
+
+## Faz 7 — Preview sonrası overlay düzeltmesi
+
+Kullanıcı Preview yayınının açıldığını, panel ve demoların çalıştığını bildirdi. Verilen Preview URL README içinde kayıtlı; bu ortamın erişimi HTTP 403 ile engellendi. Gerçek API tek kez sorgulandı, yine 403 verdi; tekrar denenmedi.
+
+Önceki şeffaflık kanıtı yalnızca CSS yüzeylerini kapsıyordu ve html/:root arka planını kaçırmıştı. Chromium PNG piksel testinde opaklık alpha=255 olarak yeniden üretildi. `html.overlay-root` sınıfı ve kök yüzey stilleriyle düzeltildi. Boş overlay bölgelerinde alpha=0, normal panelde alpha=255; görünür bildirim, özelleştirilmiş URL'nin ayrı oturumda açılması ve panel kapalı demo akışı gerçek PNG/tarayıcı üzerinden doğrulandı. Regresyon: tests/overlay.browser.mjs. Gerçek OBS ve yeni Vercel deployment doğrulaması erişim gerektiriyor; production/merge/Genesis gönderimi yapılmadı.

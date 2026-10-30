@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-Panel `/`, şeffaf overlay `/overlay` yolundadır. Statik barındırmada `/overlay` doğrudan açılışı için `index.html` SPA fallback gereklidir. Vercel Preview yapılandırması hazır; bu ortamda Vercel yetkisi/proje bağlantısı bulunmadığından henüz deploy yapılmadı.
+Panel `/`, şeffaf overlay `/overlay` yolundadır. Statik barındırmada `/overlay` doğrudan açılışı için `index.html` SPA fallback gereklidir. Vercel Preview kullanıcı tarafından açıldı; URL ve bağımsız doğrulama sınırları aşağıdaki alfa regresyonu bölümünde.
 
 ## Yayıncı iş akışı
 
@@ -60,7 +60,7 @@ Gerçek OBS bu ortamda kurulu değil. Chromium testleri OBS testi sayılmaz.
 
 Git otomatik yayınları yalnızca `feat/faz4-demo` dalı için açıktır. Ek build koruması hem `VERCEL_ENV=preview` hem `VERCEL_GIT_COMMIT_REF=feat/faz4-demo` gerektirir; Production veya başka dal derlemesi bilinçli olarak başarısız olur. Gelecekte Production ancak ayrı kullanıcı onayıyla bu koruma değiştirilerek hazırlanabilir.
 
-Bu oturumda Vercel aracı/CLI, token, CLI oturumu veya `.vercel/project.json` bulunmadı; bağlantı kurulmadı ve Preview URL oluşturulmadı. Vercel yetkisi güvenli bağlantı üzerinden sağlanmalı; token chat'e veya repoya yazılmamalı. `.vercel/` Git dışında tutulur.
+İlk hazırlık oturumunda Vercel aracı/CLI, token, CLI oturumu veya `.vercel/project.json` yoktu. Preview sonradan kullanıcı tarafından açıldı; bu ortamdan yönetim bağlantısı hâlâ mevcut değil. Vercel yetkisi güvenli bağlantı üzerinden sağlanmalı; token chat'e veya repoya yazılmamalı. `.vercel/` Git dışında tutulur.
 
 Yetkili Vercel hesabında depoyu bağlayıp mevcut dal için hedefi **Preview** seçin; framework Vite, install `npm ci`, output `dist` olsun. Ücretli plan/servis açmayın. Oluşan Preview erişim korumasının OBS ve ayrı tarayıcı oturumunu engelleyip engellemediğini kontrol edin; otomatik olarak hesap güvenliği ayarlarını değiştirmeyin. Production veya Genesis gönderimi yapmayın.
 
@@ -70,3 +70,21 @@ Son güvenlik incelemesi: uygulama yalnızca GET API çağırıyor; dinamik HTML
 
 Genesis başvuru taslağı ve açık şartlar: [docs/GENESIS_BASVURU_HAZIRLIGI.md](docs/GENESIS_BASVURU_HAZIRLIGI.md).
 Faz planı: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md). Production ve Genesis başvurusu gönderilmedi.
+
+
+## Overlay alfa regresyonu
+
+Kullanıcı tarafından açıldığı bildirilen Preview: https://squeek-live-companion-bo6p31a7w-bugra7bugra-4437s-projects.vercel.app/ . Bu ortamdan bağlantı 403 ile engellendi; yayımlanmış sürüm bağımsız doğrulanamadı.
+
+Önceki CSS kontrolleri body/sahne şeffaflığını kontrol etmiş, `:root` koyu arka planını kaçırmıştı. Gerçek Chromium PNG'sinde hata önce **alpha=255** olarak yeniden üretildi. Düzeltme overlay modunda `html` öğesine `overlay-root` sınıfı ekler ve html/body/#root/sahne yüzeylerini şeffaf yapar; normal panelin kök arka planı korunur.
+
+`tests/overlay.browser.mjs` ekran görüntüsünü `omitBackground:true` ile alıp PNG'yi çözerek gerçek piksel alfa kanalını kontrol eder; yalnızca computed CSS okumaz. Boş bölgelerde demo öncesi/sırası, yenileme, `/overlay/` ve sahte API hatasında **alpha=0**; panelde **alpha=255** doğrulandı. Bildirim kartının görünür piksel ürettiği, panodan alınan URL'nin tüm ayarları ayrı oturuma taşıdığı ve panel kapalıyken demo çalıştığı kontrol edildi. Bunlar yerel üretim çıktısı testleridir; gerçek OBS/Vercel/API kanıtı değildir.
+
+Tarayıcı regresyonunu yeniden çalıştırmak için üretim build'ini `npm run preview -- --port 5180` ile açın. Playwright yalnızca test aracıdır; uygulama bağımlılığı değildir. Mevcut Playwright/Chromium kurulumunu kullanın veya testi checkout dışındaki geçici klasöre kurun:
+
+```sh
+npm install --prefix /tmp/squeek-browser playwright
+SQUEEK_PLAYWRIGHT_MODULE=/tmp/squeek-browser/node_modules/playwright/index.mjs SQUEEK_CHROMIUM=/usr/bin/chromium node tests/overlay.browser.mjs
+```
+
+Chromium farklı konumdaysa `SQUEEK_CHROMIUM` değişkenini uyarlayın. `SQUEEK_TEST_URL` yerel test adresini değiştirir. Test, uygulamadaki ayarları değiştireceği için mevcut kullanıcı tarayıcısı yerine izole oturum açar ve API hata senaryosunda sahte 403 yanıtı kullanır.

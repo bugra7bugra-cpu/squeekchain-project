@@ -11,6 +11,7 @@ import './styles.css';
 
 const positionNames = { 'top-left': 'Sol üst', 'top-right': 'Sağ üst', 'bottom-left': 'Sol alt', 'bottom-right': 'Sağ alt' };
 const isOverlay = window.location.pathname.replace(/\/$/, '') === '/overlay';
+document.documentElement.classList.toggle('overlay-root', isOverlay);
 document.body.classList.toggle('overlay-body', isOverlay);
 
 function DemoBadge() { return <span className="demo-badge"><i />DEMO — örnek veri</span>; }
