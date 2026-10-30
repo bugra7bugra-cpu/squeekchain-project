@@ -118,7 +118,7 @@ Bu bir kabul doğrulaması değildir: güncel tam kriterler, özgünlük değerl
 
 ## Faz 5 — Doğrulanmış veri sağlayıcı ve tetikleyici
 
-**Durum:** Başlanmadı; Faz 4 sonucu ve kullanıcı onayı gerekir.
+**Durum:** Kullanıcı onayıyla Faz 5 altyapısı geliştirildi; canlı doğrulama bloke. Ayrı LiveDataProvider, çalışma zamanı alan/sürüm doğrulama, ETag/304, 429/Retry-After, hata/stale/unavailable, başlangıç ve kesinti sonrası tekrar önleme, panel/overlay ortak hook ve açık demo/canlı ayrımı eklendi. Belgeler ve API birer kez 403 verdi. Resmî schemaVersion değeri, olay türleri, polling/stale süresi ve tam sayfalama şeması bilinmediğinden verifiedContract=null; canlı ağ akışı ve tetikleyici aktivasyonu güvenli biçimde kapalı. Sentetik sağlayıcı testleri gerçek API kanıtı değildir; Faz 5 tamamlandı sayılmadı.
 
 1. Erişilebilir resmî belgeler veya açıkça aktarılmış kaynak kaydı üzerinden gereken en az endpoint, şema, olay kimliği, veri tazeliği ve tarayıcı erişim gerekliliklerini belirle. Bilinmeyenleri engel olarak kaydet; aynı ağ engelini tekrar araştırma.
 2. Canlı sağlayıcıyı demo sağlayıcıyla ortak arayüze bağla; çalışma zamanı şema doğrulaması, büyük tamsayılar, önbellek ve hız sınırlarını uygula.

@@ -5,6 +5,7 @@ import hooks from 'eslint-plugin-react-hooks';
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**'] },
   js.configs.recommended,
+  { files: ['tests/*.mjs'], languageOptions: { globals: { Response: 'readonly', setTimeout: 'readonly' } } },
   ...tseslint.configs.recommended,
   { files: ['src/**/*.{ts,tsx}'], plugins: { 'react-hooks': hooks }, rules: {
     'react-hooks/rules-of-hooks': 'error',

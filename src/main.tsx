@@ -5,6 +5,7 @@ import { createDemoSource } from './demo';
 import type { DemoEvent } from './demo';
 import { defaults, overlayUrl, parseSettings, positions, readStoredSettings, storageKey } from './settings';
 import type { Settings } from './settings';
+import { useLive } from './useLive';
 import './styles.css';
 
 const positionNames = { 'top-left': 'Sol üst', 'top-right': 'Sağ üst', 'bottom-left': 'Sol alt', 'bottom-right': 'Sağ alt' };
@@ -35,14 +36,34 @@ function useDemo(auto: boolean) {
   }, [event]);
   return { event, trigger: () => setEvent(source.current.next()) };
 }
+function DataScene({ settings, event, preview = false }: { settings: Settings; event: DemoEvent | null; preview?: boolean }) {
+  const live = useLive(settings.mode === 'live');
+  const [liveEvent, setLiveEvent] = useState<DemoEvent | null>(null);
+  useEffect(() => {
+    if (settings.mode !== 'live' || !['ready', 'empty'].includes(live.state)) {
+      setLiveEvent(null);
+      return;
+    }
+    const latest = live.events.at(-1);
+    if (!latest) return;
+    setLiveEvent({ id: latest.id, source: 'live', kind: latest.type,
+      title: 'Squeekchain olayı', message: latest.type, timestamp: latest.occurredAt });
+    const timeout = window.setTimeout(() => setLiveEvent(null), 4500);
+    return () => clearTimeout(timeout);
+  }, [live, settings.mode]);
+  return <><Scene settings={settings} event={settings.mode === 'demo' ? event : liveEvent} preview={preview} />
+    {settings.mode === 'live' && <div className="live-status" role="status">CANLI / {live.state} — {live.message}
+      {live.lastChecked && <span> Son kontrol: {new Date(live.lastChecked).toLocaleTimeString('tr-TR')}</span>}
+    </div>}</>;
+}
 function Scene({ settings, event, preview = false }: { settings: Settings; event: DemoEvent | null; preview?: boolean }) {
   const style = { '--accent': settings.color, '--alert-size': `${settings.fontSize}px` } as CSSProperties;
   return <div className={`scene ${preview ? 'scene-preview' : 'scene-overlay'} ${settings.theme}`} style={style}>
-    <div className="scene-label"><DemoBadge /><small>Canlı değil</small></div>
-    {preview && !event && <div className="scene-placeholder"><PixelHamster /><span>Sahne senin. Bir demo olayı tetikle.</span></div>}
+    <div className="scene-label">{settings.mode === 'demo' ? <><DemoBadge /><small>Canlı değil</small></> : <span className="demo-badge">CANLI — durum aşağıda</span>}</div>
+    {preview && !event && <div className="scene-placeholder"><PixelHamster /><span>{settings.mode === 'demo' ? 'Sahne senin. Bir demo olayı tetikle.' : 'Doğrulanmış canlı tetikleyici bekleniyor.'}</span></div>}
     <div className={`alert-position ${settings.position}`} role="status" aria-live="polite">
       {event && <article className="event-card" key={event.id}>
-        <PixelHamster /><div><span className="event-eyebrow">ÖRNEK OLAY / {event.kind === 'sample-block' ? 'BLOK' : 'HAMSTER'}</span>
+        <PixelHamster /><div><span className="event-eyebrow">{event.source === 'live' ? 'CANLI OLAY' : 'ÖRNEK OLAY'} / {event.kind}</span>
           <strong>{event.title}</strong><p>{event.message}</p></div>
       </article>}
     </div>
@@ -50,14 +71,14 @@ function Scene({ settings, event, preview = false }: { settings: Settings; event
 }
 function OverlayPage() {
   const [config, setConfig] = useState<{ settings: Settings; error?: string }>(() => loadOverlay());
-  const { event } = useDemo(!config.error);
+  const { event } = useDemo(!config.error && config.settings.mode === 'demo');
   useEffect(() => {
     const update = () => setConfig(loadOverlay());
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
   if (config.error) return <div className="overlay-error"><DemoBadge /><p role="alert">{config.error}</p></div>;
-  return <Scene settings={config.settings} event={event} />;
+  return <DataScene key={config.settings.mode} settings={config.settings} event={event} />;
 }
 function loadOverlay(): { settings: Settings; error?: string } {
   try {
@@ -92,7 +113,7 @@ function ControlPanel() {
     <header className="topbar"><a className="brand" href="/"><PixelHamster /><span>SQUEEK<span className="brand-light"> / LIVE COMPANION</span></span></a><span className="version">YAYIN STÜDYOSU · v0.1</span></header>
     <main>
       <div className="intro"><div><p className="eyebrow">ZİNCİRİN RİTMİ, YAYININDA.</p><h1>Yayınına biraz<br /><em>Squeek</em> kat.</h1><p>Olayları görsel tepkilere dönüştür. Sahneni tasarla, OBS'ye ekle.</p></div>
-        <div className="mode-card"><DemoBadge /><p>Şu an oyun alanındasın.</p><small>Bu sürüm örnek verilerle çalışır.<br />Gerçek API bağlantısı henüz yok.</small></div></div>
+        <div className="mode-card"><label htmlFor="data-mode">Veri kaynağı</label><select id="data-mode" value={settings.mode} onChange={e => change('mode', e.target.value as Settings['mode'])}><option value="demo">Demo — örnek veri</option><option value="live">Canlı — doğrulama bekliyor</option></select>{settings.mode === 'demo' && <DemoBadge />}<p>Canlı hata durumunda demo açılmaz.</p></div></div>
       {storageWarning && <p className="warning" role="status">{storageWarning}</p>}
       <div className="workspace">
         <section className="settings panel" aria-labelledby="settings-title"><div className="section-heading"><span className="step">01</span><h2 id="settings-title">Görünümünü ayarla</h2></div>
@@ -103,14 +124,14 @@ function ControlPanel() {
           <p className="hint">Ayarlar bu tarayıcıda saklanır. Ses ve cüzdan bağlantısı kullanılmaz.</p>
         </section>
         <section className="preview-section" aria-labelledby="preview-title"><div className="preview-heading"><div className="section-heading"><span className="step">02</span><h2 id="preview-title">Sahnede nasıl duruyor?</h2></div><span className="preview-size">16:9 ÖNİZLEME</span></div>
-          <div className="preview-frame"><Scene settings={settings} event={event} preview /></div>
-          <div className="test-bar"><div><strong>Biraz hareket katalım.</strong><p>Örnek blok ve hamster olayları sırayla oynatılır.</p></div><button className="primary" onClick={trigger}>▶ Demo olayını dene</button></div>
+          <div className="preview-frame"><DataScene key={settings.mode} settings={settings} event={event} preview /></div>
+          <div className="test-bar"><div><strong>Biraz hareket katalım.</strong><p>Örnek blok ve hamster olayları sırayla oynatılır.</p></div><button className="primary" disabled={settings.mode !== 'demo'} onClick={trigger}>▶ Demo olayını dene</button></div>
         </section>
       </div>
       <section className="obs panel" aria-labelledby="obs-title"><div className="section-heading"><span className="step">03</span><h2 id="obs-title">OBS'ye taşı</h2><span className="tag">BROWSER SOURCE</span></div>
         <div className="obs-grid"><div><p>OBS'de <strong>Kaynaklar → + → Tarayıcı</strong> seç. Bağlantıyı URL alanına yapıştır; genişliği <strong>1920</strong>, yüksekliği <strong>1080</strong> yap.</p><p className="hint">Bağımsız overlay, 8 saniyede bir demo olayı oynatır. Ayar değiştirdiğinde yeni URL'yi OBS'ye yapıştır. Paneli açık tutman gerekmez.</p></div><div><label htmlFor="obs-url">Overlay bağlantısı</label><div className="url-row"><input id="obs-url" readOnly value={url} onFocus={e => e.currentTarget.select()} /><button onClick={copy}>Kopyala</button></div><div className="link-row"><a href={url} target="_blank" rel="noreferrer">Overlay'i yeni sekmede aç ↗</a><span role="status">{copyStatus}</span></div></div></div>
       </section>
-      <footer><span>SQUEEK LIVE COMPANION</span><span>Demo stüdyosu. Gerçek zincir verisi veya rozet işlemi içermez.</span></footer>
+      <footer><span>SQUEEK LIVE COMPANION</span><span>Demo ve canlı veri ayrı tutulur. Cüzdan veya rozet işlemi içermez.</span></footer>
     </main>
   </div>;
 }

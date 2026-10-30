@@ -2,7 +2,7 @@ export const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'
 export type Position = typeof positions[number];
 export interface Settings {
   version: 1;
-  mode: 'demo';
+  mode: 'demo' | 'live';
   theme: 'dark' | 'light';
   color: string;
   position: Position;
@@ -21,7 +21,7 @@ export function parseSettings(raw: string): Settings {
   const s = value as Record<string, unknown>;
   const allowed = Object.keys(defaults);
   if (Object.keys(s).some(key => !allowed.includes(key)) ||
-      s.version !== 1 || s.mode !== 'demo' ||
+      s.version !== 1 || (s.mode !== 'demo' && s.mode !== 'live') ||
       (s.theme !== 'dark' && s.theme !== 'light') ||
       typeof s.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(s.color) ||
       !positions.includes(s.position as Position) ||
@@ -29,7 +29,7 @@ export function parseSettings(raw: string): Settings {
       s.fontSize < 16 || s.fontSize > 36) {
     throw new Error('Ayarlar geçersiz veya sürüm desteklenmiyor. Panelden yeni URL oluştur.');
   }
-  return { version: 1, mode: 'demo', theme: s.theme, color: s.color,
+  return { version: 1, mode: s.mode, theme: s.theme, color: s.color,
     position: s.position as Position, fontSize: s.fontSize };
 }
 export function readStoredSettings(): Settings {

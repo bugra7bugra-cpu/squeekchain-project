@@ -1,8 +1,8 @@
 // Internal example events, not a claimed representation of the public API.
 export interface DemoEvent {
   id: string;
-  source: 'demo';
-  kind: 'sample-block' | 'sample-hamster';
+  source: 'demo' | 'live';
+  kind: string;
   title: string;
   message: string;
   timestamp: string;

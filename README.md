@@ -46,3 +46,11 @@ Faz 4'te Chromium ile panel, mobil, ayar saklama, kopyalama, bağımsız overlay
 Henüz deploy yapılmadı. Gelecekte statik sunucu, `/overlay` doğrudan açılışında `index.html` dosyasına SPA fallback sağlamalı. OBS'nin kullanacağı URL yayıncı bilgisayarından erişilebilir olmalı; bulut geliştirme ortamının localhost adresi yayıncının bilgisayarı değildir.
 
 Faz kararları ve sonraki işler: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md).
+
+## Faz 5 — canlı sağlayıcı (doğrulama engeli var)
+
+`LiveDataProvider`, GET `/v1/events`, ETag/304, Retry-After/429, hata geri çekilmesi, unavailable ve stale durumlarını işler. İlk yanıt ve kesinti sonrası ilk başarılı yanıt yalnızca başlangıç noktasıdır; geçmiş olaylar oynatılmaz. ID tekrarları elenir. Panel ve overlay aynı sağlayıcı/hook kullanır. Canlı mod hatasında demo açılmaz; demo düğmesi canlı modda devre dışıdır.
+
+Resmî belge ve API isteği 403 ile engellendi. Kullanıcının aktardığı `events[].id/type/occurredAt`, `schemaVersion` ve unavailable bilgileri kullanıldı. **Desteklenen schemaVersion değeri, olay türü adları, polling/stale süreleri ve tam yanıt/sayfalama şeması henüz doğrulanmadı.** Bu nedenle `src/live.ts` içindeki `verifiedContract` null: canlı seçiminde açıklayıcı bloke durumu gösterilir, ağ isteği ve gerçek tetikleyici başlatılmaz. Resmî sözleşme tamamlanmadan bu kilit kaldırılmamalı. Alan adları veya sürüm uydurulmadı; canlı entegrasyon tamamlandı sayılmaz.
+
+`npm test` Node 24 ile bağımlılıksız sağlayıcı testlerini çalıştırır. Testlerdeki `test-only` şema sürümü, `test-event` olay türü ve kısa süreler yalnızca sentetik test değerleridir; resmî API iddiası değildir. Kuyruktaki son olayın gösterimi mevcut tek bildirim alanını kullanır; tam animasyon kuyruğu Faz 6 kapsamındadır. Önbelleğin güncelliği başarılı kontrol zamanıdır; olay zamanı tek başına ağ bağlantısı tazeliği sayılmaz.
