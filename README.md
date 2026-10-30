@@ -18,7 +18,7 @@ npm run build
 npm run preview
 ```
 
-Panel `/`, şeffaf overlay `/overlay` yolundadır. Statik barındırmada `/overlay` doğrudan açılışı için `index.html` SPA fallback gereklidir. Henüz deploy yapılmadı.
+Panel `/`, şeffaf overlay `/overlay` yolundadır. Statik barındırmada `/overlay` doğrudan açılışı için `index.html` SPA fallback gereklidir. Vercel Preview yapılandırması hazır; bu ortamda Vercel yetkisi/proje bağlantısı bulunmadığından henüz deploy yapılmadı.
 
 ## Yayıncı iş akışı
 
@@ -54,4 +54,19 @@ Gerçek OBS bu ortamda kurulu değil. Chromium testleri OBS testi sayılmaz.
 - Demo etiketi kayıt/çıktıda okunmalı; arka plan şeffaf, bildirimler kenarlardan taşmadan görünmeli. 1080p dışında kullandığın çözünürlükte de dene.
 - API modunda bağlantı yokken hata görünmeli, örnek olay oynatılmamalı. Erişim olan ortamda ilk yanıt geçmişi oynatmamalı; yeni gerçek olay tek bildirim üretmeli. Bu son kontrol henüz yapılmadı.
 
-Faz planı: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md). Faz 7, deploy ve başvuru bu çalışmaya dahil değildir.
+## Vercel Preview hazırlığı (Faz 7)
+
+`vercel.json`: Vite, `npm ci`, `dist` çıktısı; `/overlay` ve `/overlay/` → `/index.html` rewrite. Asset URL'leri rewrite edilmez. CSP yalnızca yerel scriptlere ve Squeekchain API bağlantısına izin verir; satır içi stiller React görünüm ayarları için açıktır. Referrer gönderilmez; kamera/mikrofon/konum kapalıdır. Bunlar gerçek Vercel'de henüz doğrulanmadı.
+
+Git otomatik yayınları yalnızca `feat/faz4-demo` dalı için açıktır. Ek build koruması hem `VERCEL_ENV=preview` hem `VERCEL_GIT_COMMIT_REF=feat/faz4-demo` gerektirir; Production veya başka dal derlemesi bilinçli olarak başarısız olur. Gelecekte Production ancak ayrı kullanıcı onayıyla bu koruma değiştirilerek hazırlanabilir.
+
+Bu oturumda Vercel aracı/CLI, token, CLI oturumu veya `.vercel/project.json` bulunmadı; bağlantı kurulmadı ve Preview URL oluşturulmadı. Vercel yetkisi güvenli bağlantı üzerinden sağlanmalı; token chat'e veya repoya yazılmamalı. `.vercel/` Git dışında tutulur.
+
+Yetkili Vercel hesabında depoyu bağlayıp mevcut dal için hedefi **Preview** seçin; framework Vite, install `npm ci`, output `dist` olsun. Ücretli plan/servis açmayın. Oluşan Preview erişim korumasının OBS ve ayrı tarayıcı oturumunu engelleyip engellemediğini kontrol edin; otomatik olarak hesap güvenliği ayarlarını değiştirmeyin. Production veya Genesis gönderimi yapmayın.
+
+Preview URL oluştuğunda `/`, doğrudan `/overlay`, `/overlay/` ve yenileme; URL'deki ayarların ayrı oturuma taşınması; arka plan şeffaflığı; mobil/masaüstü; CSP ve tarayıcı konsolu test edilmeli. API modu Preview kökeninden denenmeli: gerçek HTTP durumu, CORS, ETag erişimi ve doğrulanmış JSON sonucu ayrı kaydedilmeli. Yeni gerçek olay oluşmadıysa bildirim akışı doğrulanmış sayılmamalı.
+
+Son güvenlik incelemesi: uygulama yalnızca GET API çağırıyor; dinamik HTML/JS yürütme, cüzdan, gizli anahtar, backend veya ödeme yok. Üretim bağımlılıklarında `npm audit --omit=dev` 0 zafiyet bildirdi. Yerel üretim çıktısı, Vercel rewrite/başlıklarını uygulayan test sunucusunda Chromium ile sınandı; bu Vercel deployment veya gerçek API/OBS testi değildir.
+
+Genesis başvuru taslağı ve açık şartlar: [docs/GENESIS_BASVURU_HAZIRLIGI.md](docs/GENESIS_BASVURU_HAZIRLIGI.md).
+Faz planı: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md). Production ve Genesis başvurusu gönderilmedi.

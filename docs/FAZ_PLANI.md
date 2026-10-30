@@ -1,6 +1,6 @@
 # Squeekchain Genesis — 7 fazlık proje planı
 
-> Durum: Faz 6 uygulandı; gerçek API/OBS kullanım kanıtı beklemede · 30 Ekim 2026
+> Durum: Faz 7 Preview hazırlığı tamam; Vercel yetkisi ve gerçek kullanım kanıtı beklemede · 30 Ekim 2026
 > Amaç: Squeekchain'e gerçekten bağlı çalışan bir ürün geliştirmek, yayınlamak ve Genesis Code Lane başvurusuna hazırlanmak.
 > `AGENTS.md` kalıcı çalışma kurallarıdır; bu dosya **hangi sırayla ne yapacağımızı** anlatır.
 
@@ -131,7 +131,7 @@ Bu bir kabul doğrulaması değildir: güncel tam kriterler, özgünlük değerl
 
 **Durum:** Kullanıcı onayıyla uygulandı. Beş bekleyen olay + aktif bildirim kuyruğu, taşmada en eski bekleyeni düşürme, 3–10 sn süre ve 0–30 sn sessiz aralık, iki bağımsız tetikleyici filtresi eklendi. Aynı ayarlar demo, önizleme ve bağımsız overlay üzerinde ortak kuyruk/çizim mantığıyla uygulanır. Mod değişimi ve canlı hatası kuyruğu temizler. API seçimi bağlantı başarısı sayılmaz; doğrulanmayan bağlantıda “API bağlantısı doğrulanmadı” gösterilir. Arayüz, piksel animasyonu, klavye odağı, reduced-motion ve mobil görünüm iyileştirildi; yeni kütüphane eklenmedi. Eski v1 URL/kayıtları yeni varsayılanlarla taşınır; geçersiz alanlar reddedilir.
 
-**Kontrol kanıtı:** 17 birim testi (10 sağlayıcı + 7 kuyruk/ayar), TypeScript, ESLint ve build başarılı. Chromium masaüstü/mobil: süre/aralık, kuyruk, tetikleyiciler, mod geçişi, sahte API hatası, saklama, URL, klavye, reduced-motion, şeffaflık ve panel kapalı bağımsız demo doğrulandı. Sahte API yanıtı gerçek bağlantı kanıtı değildir. 403 tekrar araştırılmadı. Gerçek OBS kurulu değil; README'de yayıncı test listesi var. Gerçek API olayı ve gerçek OBS yayını doğrulanmadığı için uçtan uca kabul beklemede. Faz 7'ye geçilmedi.
+**Kontrol kanıtı:** 17 birim testi (10 sağlayıcı + 7 kuyruk/ayar), TypeScript, ESLint ve build başarılı. Chromium masaüstü/mobil: süre/aralık, kuyruk, tetikleyiciler, mod geçişi, sahte API hatası, saklama, URL, klavye, reduced-motion, şeffaflık ve panel kapalı bağımsız demo doğrulandı. Sahte API yanıtı gerçek bağlantı kanıtı değildir. 403 tekrar araştırılmadı. Gerçek OBS kurulu değil; README'de yayıncı test listesi var. Gerçek API olayı ve gerçek OBS yayını doğrulanmadığı için uçtan uca kabul beklemede. Faz 6 kod tarafı kullanıcı tarafından onaylandı; Faz 7 hazırlığına geçildi.
 
 1. **6A:** Kontrol paneli, tema/renk/konum/boyut ayarları ve ortak önizlemeyi tamamla; ayarları sürümlü sakla.
 2. **6B:** Efekt, bildirim kuyruğu, süre/minimum aralık ve tetikleyici aç/kapat davranışını tamamla. Hareket azaltma tercihini destekle; hızlı yanıp sönen efekt kullanma.
@@ -156,7 +156,7 @@ Yapılacaklar:
 
 **Bitti sayılma şartı:** Canlı uygulama URL'si ve temel test kanıtları mevcut; başvuru kullanıcı tarafından onaylanmış ve gönderilmiş (veya açıkça bloke olarak raporlanmış). Rozet sonucu ayrı takip edilir.
 
-**Durum:** [ ] Başlanmadı
+**Durum:** Kullanıcı yalnızca Preview yayını ve test hazırlığına izin verdi. Vercel rewrite, güvenlik başlıkları ve Preview/dal build koruması hazır; AGENTS.md ürün/teknoloji ifadeleri güncellendi. README ve docs/GENESIS_BASVURU_HAZIRLIGI.md başvuru taslağı/açık şartları içeriyor. Vercel aracı/token/oturum/proje bağlantısı bulunmadığından Preview oluşturulamadı. 20 test, TypeScript, ESLint ve build geçti; üretim bağımlılıkları audit sonucu 0 zafiyet. Yerel üretim çıktısı Vercel rewrite/başlık simülasyonuyla Chromium masaüstü/mobilde sınandı; /, /overlay ve /overlay/ doğrudan açılış ve yenilemeleri, URL ayarları ve şeffaflık geçti. Preview dalı build komutu başarılı; Production/başka dal koruması test edildi. Bunlar yayımlanmış uygulama testi değildir. Gerçek API testi yayımlanmış köken olmadan yapılamadı; eski 403 kanıtı geçerli, tekrar araştırılmadı. Gerçek OBS testi bekliyor. Merge, Production, DNS ve Genesis başvurusu yapılmadı; Faz 7 tamamlandı sayılmaz.
 
 ---
 
