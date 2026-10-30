@@ -131,3 +131,4 @@ test('HTTP errors without JSON preserve status',async()=>{
   const stop=new LiveDataProvider(contract,async()=>new Response('<html>bad gateway</html>',{status:502})).start(s=>states.push(s));
   try {await until(()=>states.some(s=>s.state==='error'));const error=states.find(s=>s.state==='error');assert.equal(error.httpStatus,502);assert.equal(error.apiError,undefined);assert.match(error.message,/HTTP 502/);}finally{stop();}
 });
+test('request is invoked without binding the provider as native fetch receiver',async()=>{const states=[];const stop=new LiveDataProvider(contract,async function(){assert.equal(this,undefined);return response([]);}).start(s=>states.push(s));try{await until(()=>states.some(s=>s.state==='empty'));}finally{stop();}});

@@ -110,3 +110,28 @@ Varsayılan DEMO modunda örnek olay düğmeleri açıkça etiketlidir. Settleme
 OBS Browser Source URL'sine `/arena` adresini ekleyin, 1280×900 kullanın. Kaynağa sağ tıklayıp Interact/Etkileşim açın; oyun alanına odaklanıp klavye veya düğmelerle oynayın. Arena kendi opak sahnesini içerir. Gerçek OBS testi ve gerçek canlı olay etkisi doğrulanmadı.
 
 Arena geliştirmesi için otomatik Vercel dal deployment'ı kapatıldı; bu commit için Preview/Production yayını yetkilendirilmedi.
+
+## Arena doğrulama ve Preview teslimi
+
+Paneldeki **Hamster Event Arena oyna** bağlantısıyla veya `/arena` adresiyle açın. Mobil yön düğmelerini basılı tutun; bırakma/iptal hareketi durdurur. Başlat/devam et oyun alanına klavye odağı verir. Seçim kutusunda oklar kaynağı seçer; oyun karakterini hareket ettirmez. Sekme gizlenince veya pencere odağı kaybolunca tur duraklar. Süre yalnızca oyun saatiyle azalır; kontrol düğmeleri zamanı harcamaz. Canlı hata/stale/unavailable halinde etkin olay bonusları kaldırılır, normal oyun sürer.
+
+OBS için Browser Source boyutu 1280×900 önerilir. Interact penceresinde Başlat'a tıklayın, ok/WASD kullanın; gerekirse oyun alanına tıklayın. Interact kapanınca tur duraklar; tekrar açıp Devam et kullanın. Kaynak yeniden yüklenirse tur sıfırlanır. Panel ve arena ayrı sayfalardır; panel kapalıyken Arena çalışabilir. Arena opak bir oyun sahnesidir; mevcut `/overlay` şeffaf bildirim kaynağıdır. Gerçek OBS doğrulaması yayıncı ortamında beklemektedir.
+
+Tarayıcı testleri, uygulama bağımlılığı olmayan harici Playwright kurulumuyla çalışır:
+
+```powershell
+$env:SQUEEK_PLAYWRIGHT_MODULE='file:///C:/path/to/playwright/index.mjs'
+$env:SQUEEK_CHROMIUM='C:\Program Files\Google\Chrome\Application\chrome.exe'
+$env:SQUEEK_TEST_URL='http://127.0.0.1:5181'
+# Ayrı terminalde: npm run preview -- --host 127.0.0.1 --port 5181
+node tests/arena.browser.mjs
+node tests/overlay.browser.mjs
+```
+
+Arena testi Playwright saatiyle tam 60 saniyelik turu, mobil yön kontrolünü ve sahte 400 yanıtını sınar. Fixture/mocked API sonuçları gerçek API bağlantısı değildir.
+
+### Mevcut Vercel projesinde yalnızca Preview
+
+Bu oturumda Vercel CLI, oturum, proje bağlantısı veya VERCEL değişkenleri bulunmadı. Otomatik Git deployment kapalı kalır; Production build koruması korunur. Yetkili kullanıcı mevcut Vercel projesinde `feat/faz4-demo` dalının son commit'ini **Preview** hedefiyle yayınlamalı; yeni proje oluşturulmamalı ve Production branch değiştirilmemelidir. CLI kullanılıyorsa mevcut projeye `vercel link` ile bağlandıktan sonra `vercel --target=preview --build-env VERCEL_GIT_COMMIT_REF=feat/faz4-demo` çalıştırın; `--prod` kullanmayın. Build ortamının `VERCEL_ENV=preview` olduğunu doğrulayın. Production yetkisi yoktur.
+
+Yayın sonrası oturumsuz `/`, `/arena`, `/arena/`, `/overlay`, `/overlay/` ve yenileme kontrol edilmeli; demo etiketleri, OBS Interact, şeffaf overlay ve Preview kökeninden API hatası ayrı kaydedilmelidir. README'deki eski Preview URL önceki kullanıcı beyanıdır; yeni Arena sürümünün yayın kanıtı değildir.

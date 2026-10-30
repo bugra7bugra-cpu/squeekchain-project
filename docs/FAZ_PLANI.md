@@ -213,3 +213,13 @@ Uygulamada HTTP durum kodu ve kısa API hata kodu görünürlüğü iyileştiril
 Kullanıcı /arena mini oyununu, testlerini ve mevcut dalda commit/push işlemini onayladı. 60 saniyelik puan toplama, klavye/ekran kontrolleri, duraklatma/sıfırlama ve iki olayın 8 saniyelik puan/hız etkisi bağımsız mod olarak eklendi. Demo açık etiketlidir; canlı API sorunu çözülmüş sayılmaz. Deploy yasaklandığı için dalın otomatik Vercel deployment ayarı kapatıldı. Gerçek OBS ve gerçek API kabul kanıtı bekliyor.
 
 Kontrol: 32 test geçti (Windows Bash testi sandbox dışında); TypeScript, lint ve build başarılı. Chromium etkileşim testi bu oturumda çalıştırılmadı. Gerçek API/OBS doğrulaması bekliyor.
+
+## Arena son doğrulama — 30 Ekim 2026
+
+Kullanıcının onayladığı tamamlayıcı görev: panelden Arena bağlantısı, mobil basılı yön kontrolü, kontrol düğmelerinin zamanı fazladan azaltması hatasının giderilmesi, klavye odağı, sekme gizlenmesi/blur ile duraklama, canlı hata halinde bonus temizliği. Chromium gerçek fetch çağrısının provider nesnesine bağlanması nedeniyle ağdan önce hata verdiğini ortaya çıkardı; istek sarmalayıcısıyla düzeltildi. Bu, uzaktaki HTTP 400/invalid_query hatasının çözümü değildir.
+
+Yerel üretim çıktısında Playwright + Chrome: panelden Arena erişimi, klavye/puan, tam 60 sn (sanal saat), duraklat/sıfırla, demo bonus/sona erme, sahte HTTP 400 ile oynanabilirlik, odak kaybı, 390 px mobil basılı yön/bırakma/taşma ve /arena/ yenileme geçti. Mevcut overlay regresyonu: PNG alfa, bağımsız demo, URL ayarları ve sahte API hatası geçti. Gerçek API/OBS/Vercel kanıtı değildir. Tarayıcı test aracı checkout dışında; uygulama bağımlılığı eklenmedi.
+
+Preview hazırlığı mevcut; bu ortamda Vercel CLI/oturum/proje bağlantısı veya VERCEL değişkeni yok. Otomatik deployment kapalı ve Production build koruması korunuyor. Kullanıcı mevcut projeye yetkili hesapla yalnızca Preview yayınlayabilir; README yönergesi var. Gerçek OBS Interact ve canlı olay etkisi, sunucu hata incelemesi, güncel başvuru koşulları açık. Main merge, Production ve Genesis gönderimi yapılmadı.
+
+Son kalite kapısı: 35/35 birim testi, TypeScript, ESLint, üretim build ve diff kontrolü başarılı. npm audit --omit=dev: 0 zafiyet. Arena + overlay Chromium etkileşim/regresyon testleri başarılı.

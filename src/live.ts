@@ -106,7 +106,7 @@ export class LiveDataProvider {
   private controller?: AbortController;
   constructor(contract: LiveContract | null = verifiedContract, request: typeof fetch = fetch) {
     this.contract = contract;
-    this.request = request;
+    this.request = (input, init) => request(input, init);
   }
   start(onSnapshot: (snapshot: LiveSnapshot) => void): () => void {
     const c = this.contract;

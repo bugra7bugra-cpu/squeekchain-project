@@ -123,7 +123,7 @@ function ControlPanel() {
   return <div className={`app ${settings.theme}`}>
     <header className="topbar"><a className="brand" href="/"><PixelHamster /><span>SQUEEK<span className="brand-light"> / LIVE COMPANION</span></span></a><span className="version">YAYIN STÜDYOSU · v0.1</span></header>
     <main>
-      <div className="intro"><div><p className="eyebrow">ZİNCİRİN RİTMİ, YAYININDA.</p><h1>Yayınına biraz<br /><em>Squeek</em> kat.</h1><p>Olayları görsel tepkilere dönüştür. Sahneni tasarla, OBS'ye ekle.</p></div>
+      <div className="intro"><div><p className="eyebrow">ZİNCİRİN RİTMİ, YAYININDA.</p><a href="/arena">🐹 Hamster Event Arena oyna →</a><h1>Yayınına biraz<br /><em>Squeek</em> kat.</h1><p>Olayları görsel tepkilere dönüştür. Sahneni tasarla, OBS'ye ekle.</p></div>
         <div className="mode-card"><label htmlFor="data-mode">Veri kaynağı</label><select id="data-mode" value={settings.mode} onChange={e => change('mode', e.target.value as Settings['mode'])}><option value="demo">Demo — örnek veri</option><option value="live">Canlı — Squeekchain olayları</option></select>{settings.mode === 'demo' && <DemoBadge />}<p>Canlı hata durumunda demo açılmaz.</p></div></div>
       {storageWarning && <p className="warning" role="status">{storageWarning}</p>}
       <div className="workspace">
@@ -155,5 +155,4 @@ function ControlPanel() {
   </div>;
 }
 createRoot(document.getElementById('root')!).render(<StrictMode>{window.location.pathname.replace(/\/$/, "") === "/arena" ? <Arena /> : isOverlay ? <OverlayPage /> : <ControlPanel />}</StrictMode>);
-
 

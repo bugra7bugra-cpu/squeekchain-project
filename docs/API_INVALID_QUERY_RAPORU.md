@@ -52,3 +52,7 @@ Tek istek: parametreli GET; Preview kökenli Origin ve Accept:*/* ile. Sonuç: a
 ## Uygulamadaki doğrulanmış iyileştirme
 
 HTTP hata durumunda kısa makine hata kodu güvenli biçimde okunur; `HTTP 400 / invalid_query` gösterilir. HTML/keyfi sunucu metni gösterilmez; error body 4096 byte, kod 64 karakter ve izin verilen karakterlerle sınırlandırılır. JSON yoksa HTTP kodu korunur. 429/503 Retry-After, baseline, tekrar önleme ve demo ayrımı korunur. Bu **tanı görünürlüğü düzeltmesidir**, canlı API hatasının çözüldüğü iddiası değildir.
+
+## 30 Ekim 2026 — ayrı istemci bulgusu
+
+Arena Chromium doğrulamasında native fetch fonksiyonunun `this.request(...)` ile provider nesnesine bağlanması, isteği ağ katmanından önce kesebilen bir çağrı hatası olarak yeniden üretildi. İstek artık receiver bağlamını taşımayan sarmalayıcıdan çağrılıyor; sahte HTTP 400/invalid_query yanıtı tarayıcıda doğru gösterildi. Bu yerel istemci düzeltmesi, daha önce kullanıcı tarafından bildirilen uzak HTTP 400'ün nedeni veya çözümü olarak sunulamaz. Gerçek endpoint yeniden denenmedi; sunucu log karşılaştırması gereksinimi sürüyor.
