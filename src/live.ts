@@ -1,3 +1,5 @@
+export const eventsUrl = 'https://api.squeekchain.com/v1/events?category=all&limit=40';
+
 export interface LiveEvent { id: string; type: string; occurredAt: string; eventVersion: number }
 export interface LiveContract {
   schemaVersion: string | number;
@@ -40,6 +42,10 @@ export function parseEvents(value: unknown, contract: LiveContract): LiveEvent[]
   if (!record(value) || value.schemaVersion !== contract.schemaVersion) throw new Error('Desteklenmeyen şema sürümü.');
   if (value.status === 'unavailable') return null;
   if (value.status !== 'available') throw new Error('Geçersiz API durumu.');
+  if (value.category !== 'all' || !Array.isArray(value.activeEventTypes) ||
+      !value.activeEventTypes.every(type => typeof type === 'string')) {
+    throw new Error('Olay kategorisi veya aktif tür listesi geçersiz.');
+  }
   if (!Array.isArray(value.events)) throw new Error('Olay listesi geçersiz.');
   return value.events.map(event => {
     if (!record(event) || typeof event.id !== 'string' || !event.id ||
@@ -97,7 +103,7 @@ export class LiveDataProvider {
       this.controller = new AbortController();
       const timeout = setTimeout(() => this.controller?.abort(), Math.min(c.pollMs, 15000));
       try {
-        const response = await this.request('https://api.squeekchain.com/v1/events', {
+        const response = await this.request(eventsUrl, {
           method: 'GET', credentials: 'omit', signal: this.controller.signal,
           headers: this.etag ? { 'If-None-Match': this.etag } : {},
         });

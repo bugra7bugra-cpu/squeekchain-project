@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "status": "available",
+  "category": "all",
+  "activeEventTypes": ["system.settlement_completed"],
+  "events": [
+    {
+      "id": "fixture-settlement-1",
+      "type": "system.settlement_completed",
+      "eventVersion": 2,
+      "occurredAt": "2026-10-30T12:00:36.000Z"
+    }
+  ]
+}

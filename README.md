@@ -36,8 +36,8 @@ URL fragment'ı yalnızca izin verilen görünüm, süre, tetikleyici ve veri mo
 
 Kaynak: https://docs.squeekchain.com/developers/api/ — aşağıdaki bilgiler kullanıcı tarafından başka ortamda doğrulanarak aktarıldı; bağımsız doğrulama iddiası yok.
 
-- GET `https://api.squeekchain.com/v1/events`; sayısal `schemaVersion: 3`, `status: available | unavailable`.
-- Olaylar: string `id/type`, ISO 8601 `occurredAt`, tamsayı `eventVersion`.
+- GET `https://api.squeekchain.com/v1/events?category=all&limit=40`; sayısal `schemaVersion: 3`, `status: available | unavailable`.
+- Available yanıtı: `category: "all"`, string dizisi `activeEventTypes` ve `events` dizisi. Olaylar: string `id/type`, ISO 8601 `occurredAt`, tamsayı `eventVersion`.
 - Tetikleyiciler: `system.settlement_completed` v2; `measurement.daily_distance_milestone` v1. Diğer tür/sürümler bildirim üretmez.
 - Feed cache 5 saniye; her tamamlanan isteğin ardından 15 saniye polling beklemesi. Limit 5 istek/s, burst 20. Panel/overlay bağımsız tüketicidir.
 - ETag/If-None-Match/304, 429/503 Retry-After ve hata geri çekilmesi desteklenir. HTTP 200 unavailable sıfır veri değildir. Son başarılı kontrolün 45 saniye geride kalması uygulama tercihi olarak stale sayılır.
@@ -88,3 +88,10 @@ SQUEEK_PLAYWRIGHT_MODULE=/tmp/squeek-browser/node_modules/playwright/index.mjs S
 ```
 
 Chromium farklı konumdaysa `SQUEEK_CHROMIUM` değişkenini uyarlayın. `SQUEEK_TEST_URL` yerel test adresini değiştirir. Test, uygulamadaki ayarları değiştireceği için mevcut kullanıcı tarayıcısı yerine izole oturum açar ve API hata senaryosunda sahte 403 yanıtı kullanır.
+
+
+## Parametreli events sorgusu düzeltmesi
+
+Kullanıcı parametresiz endpoint'in `invalid_query`, `category=all&limit=40` sorgusunun ise geçerli JSON döndürdüğünü kendi tarayıcısında doğruladı. Sağlayıcı bu sabit parametreli adresi kullanır; testler ilk ve ETag'li isteklerin aynı URL'ye gitmesini kontrol eder. Available yanıtında category ve activeEventTypes alanları da doğrulanır; ek alanlar olay gösterimine aktarılmaz. Unavailable yanıtı boş feed olarak yorumlanmaz.
+
+Fixture ve kaynak sınırı: [tests/fixtures/README.md](tests/fixtures/README.md). Şema, başlangıç, tekrar önleme, 304, 429, 503 ve kesinti sonrası toparlanma dahil 24 test geçti. Fixture'lı testler gerçek API erişimi değildir. Preview bu ortamdan tek denemede 403 verdi; sorun tekrar araştırılmadı. Kullanıcının doğrudan JSON erişimi doğrulaması, Preview kökeninden JavaScript fetch/CORS başarısı sayılmaz; o kontrol hâlâ bekliyor.

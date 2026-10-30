@@ -193,3 +193,10 @@ Bu dosyaları GitHub deposuna koyduktan sonra şunu gönder:
 Kullanıcı Preview yayınının açıldığını, panel ve demoların çalıştığını bildirdi. Verilen Preview URL README içinde kayıtlı; bu ortamın erişimi HTTP 403 ile engellendi. Gerçek API tek kez sorgulandı, yine 403 verdi; tekrar denenmedi.
 
 Önceki şeffaflık kanıtı yalnızca CSS yüzeylerini kapsıyordu ve html/:root arka planını kaçırmıştı. Chromium PNG piksel testinde opaklık alpha=255 olarak yeniden üretildi. `html.overlay-root` sınıfı ve kök yüzey stilleriyle düzeltildi. Boş overlay bölgelerinde alpha=0, normal panelde alpha=255; görünür bildirim, özelleştirilmiş URL'nin ayrı oturumda açılması ve panel kapalı demo akışı gerçek PNG/tarayıcı üzerinden doğrulandı. Regresyon: tests/overlay.browser.mjs. Gerçek OBS ve yeni Vercel deployment doğrulaması erişim gerektiriyor; production/merge/Genesis gönderimi yapılmadı.
+
+
+## Faz 7 — Parametreli events sorgusu düzeltmesi
+
+Kullanıcının kendi tarayıcısında doğruladığı `GET /v1/events?category=all&limit=40` adresi sağlayıcıda kullanılıyor; parametresiz isteğin invalid_query sorunu giderildi. Available yanıtında category=all ve activeEventTypes:string[] doğrulaması eklendi. schemaVersion=3, gerekli olay alanları, başlangıç/baseline, ID tekrar önleme, ETag/304, 429/503 Retry-After ve hata toparlanması korunuyor.
+
+Aktarılan gerçek örnek yapısının minimal fixture'ı eklendi; paylaşılmayan ID kurgusal test ID'si olarak açıkça belgelendi. 24 test, TypeScript, lint ve build geçti. Preview erişimi bir kez denendi, ağ vekilinde 403 verdi; yayımlanan kökenden gerçek API isteği yapılamadı. Doğrudan JSON erişimi ile JavaScript fetch/CORS doğrulaması ayrı tutuluyor; gerçek yeni olayın gösterimi henüz doğrulanmış değil. Yeni özellik, merge, production veya başvuru yok.

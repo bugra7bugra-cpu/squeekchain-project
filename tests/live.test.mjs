@@ -1,10 +1,14 @@
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
+import { URL } from 'node:url';
 import assert from 'node:assert/strict';
 import { LiveDataProvider, parseEvents, retryDelay, verifiedContract, EventHistory } from '../src/live.ts';
-// Source-relayed API format; only polling durations are shortened for tests.
+// Source-relayed real response structure. The missing actual ID is a synthetic fixture ID.
+const fixture = JSON.parse(readFileSync(new URL('./fixtures/events.available.json', import.meta.url), 'utf8'));
+// Polling durations alone are shortened for tests.
 const contract = {...verifiedContract,pollMs:20,staleMs:100};
-const event = id => ({id,type:'system.settlement_completed',eventVersion:2,occurredAt:'2026-10-30T12:00:00Z'});
-const body = events => ({schemaVersion:3,status:'available',events});
+const event = id => ({...fixture.events[0], id});
+const body = events => ({...fixture,events});
 const response = (events,headers={}) => new Response(JSON.stringify(body(events)),{headers});
 const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check) { for(let i=0;i<100;i++){ if(check()) return; await wait(5); } throw new Error('Timeout'); }
@@ -20,12 +24,14 @@ test('missing official contract blocks all network requests',()=>{
   assert.equal(state,'blocked');assert.equal(requests,0);
 });
 test('baseline, deduplication, ETag and 304',async()=>{
-  const states=[]; const calls=[];
+  const states=[]; const calls=[]; const urls=[];
   const replies=[response([event('old')],{ETag:'v1'}),response([event('old'),event('new'),event('new')],{ETag:'v2'}),new Response(null,{status:304})];
-  const stop=new LiveDataProvider(contract,async(_url,options)=>{calls.push(options);return replies.shift() ?? new Response(null,{status:304});}).start(s=>states.push(s));
+  const stop=new LiveDataProvider(contract,async(url,options)=>{urls.push(url);calls.push(options);return replies.shift() ?? new Response(null,{status:304});}).start(s=>states.push(s));
   try {
     await until(()=>states.filter(s=>s.state==='ready').length>=3);
     assert.deepEqual(states.flatMap(s=>s.events.map(e=>e.id)),['new']);
+    assert.ok(urls.every(url=>url==='https://api.squeekchain.com/v1/events?category=all&limit=40'));
+    assert.ok(calls.every(call=>call.method==='GET' && call.credentials==='omit'));
     assert.equal(calls[1].headers['If-None-Match'],'v1');
     assert.equal(calls[2].headers['If-None-Match'],'v2');
   } finally {stop();}
@@ -71,4 +77,28 @@ test('503 also honors Retry-After and publishes unavailable',async()=>{
   let calls=0;const states=[];
   const stop=new LiveDataProvider(contract,async()=>{calls++;return new Response(null,{status:503,headers:{'Retry-After':'1'}});}).start(s=>states.push(s));
   try {await until(()=>states.some(s=>s.state==='unavailable'));await wait(60);assert.equal(calls,1);}finally{stop();}
+});
+
+test('relayed real example parses and preserves the timestamp/version',()=>{
+  assert.deepEqual(parseEvents(fixture,verifiedContract),fixture.events);
+  for(const patch of [{category:'other'},{activeEventTypes:null},{activeEventTypes:[1]}]) {
+    assert.throws(()=>parseEvents({...fixture,...patch},verifiedContract));
+  }
+});
+test('invalid_query response is rejected, not treated as empty events',()=>{
+  assert.throws(()=>parseEvents({error:'invalid_query'},verifiedContract));
+});
+test('304 without a validated cache is an error',async()=>{
+  const states=[];
+  const stop=new LiveDataProvider(contract,async()=>new Response(null,{status:304})).start(s=>states.push(s));
+  try {await until(()=>states.some(s=>s.state==='error'));assert.deepEqual(states.flatMap(s=>s.events),[]);}finally{stop();}
+});
+test('connection recovery seeds a new baseline instead of replaying backlog',async()=>{
+  const states=[];let calls=0;
+  const stop=new LiveDataProvider(contract,async()=>{
+    calls++;
+    if(calls===2)throw new Error('connection lost');
+    return response(calls===1?[event('initial')]:calls===3?[event('backlog')]:[event('backlog'),event('fresh')]);
+  }).start(s=>states.push(s));
+  try {await until(()=>states.some(s=>s.events.length));assert.ok(states.some(s=>s.state==='error'));assert.deepEqual(states.flatMap(s=>s.events.map(e=>e.id)),['fresh']);}finally{stop();}
 });
