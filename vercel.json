@@ -7,7 +7,7 @@
   "git": {
     "deploymentEnabled": {
       "*": false,
-      "feat/faz4-demo": true
+      "feat/faz4-demo": false
     }
   },
   "rewrites": [
@@ -17,6 +17,14 @@
     },
     {
       "source": "/overlay/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/arena",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/arena/",
       "destination": "/index.html"
     }
   ],

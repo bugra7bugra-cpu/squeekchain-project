@@ -207,3 +207,9 @@ Aktarılan gerçek örnek yapısının minimal fixture'ı eklendi; paylaşılmay
 Kullanıcı parametreli GET için de HTTP 400/error=invalid_query, aynı URL navigasyonu için başarılı JSON bildirdi. Kod ve URL testleri query bozukluğu bulmadı. Tek kontrollü uzak istek API'ye ulaşmadan ağ vekilinde 403 aldı; daha fazla header/query denemesi yapılmadı. Yerel Chromium karşılaştırması Origin ve Accept farkını gösterdi; bunun uzak sunucudaki neden olduğu doğrulanmadı. CORS kök neden olarak varsayılmadı; no-cors/proxy/header taklidi eklenmedi.
 
 Uygulamada HTTP durum kodu ve kısa API hata kodu görünürlüğü iyileştirildi; sunucu metni güvenli sınırlarla okunuyor. 28 test, TypeScript, lint, build ve Chromium alfa/URL/demo/hata regresyonu geçti. Sunucu ekibi raporu docs/API_INVALID_QUERY_RAPORU.md içinde. Canlı API sorunu çözülmüş sayılmaz; sonraki adım hassas bilgilerden arındırılmış başarılı navigasyon/başarısız fetch kayıtlarının sunucu loglarıyla karşılaştırılmasıdır. Merge, production ve başvuru yok.
+
+## Onaylı ek görev — Hamster Event Arena
+
+Kullanıcı /arena mini oyununu, testlerini ve mevcut dalda commit/push işlemini onayladı. 60 saniyelik puan toplama, klavye/ekran kontrolleri, duraklatma/sıfırlama ve iki olayın 8 saniyelik puan/hız etkisi bağımsız mod olarak eklendi. Demo açık etiketlidir; canlı API sorunu çözülmüş sayılmaz. Deploy yasaklandığı için dalın otomatik Vercel deployment ayarı kapatıldı. Gerçek OBS ve gerçek API kabul kanıtı bekliyor.
+
+Kontrol: 32 test geçti (Windows Bash testi sandbox dışında); TypeScript, lint ve build başarılı. Chromium etkileşim testi bu oturumda çalıştırılmadı. Gerçek API/OBS doğrulaması bekliyor.

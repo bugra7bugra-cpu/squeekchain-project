@@ -100,3 +100,13 @@ Fixture ve kaynak sınırı: [tests/fixtures/README.md](tests/fixtures/README.md
 ## HTTP 400 / invalid_query tanısı
 
 Parametreli sorgunun uygulamada hâlâ 400 döndüğü kullanıcı tarafından bildirildi; URL kodlamasında hata bulunmadı. Navigasyon/fetch başlık farkının sunucuda neden olduğu henüz kanıtlanmadı; CORS kaynaklı olduğu varsayılmıyor. Uygulama artık HTTP kodunu ve güvenli kısa API hata kodunu gösterir (örneğin `HTTP 400 / invalid_query`). Bu, tanı iyileştirmesidir; gerçek API bağlantısını düzelttiği iddia edilmez. İnceleme ve sunucu ekibi için rapor: [docs/API_INVALID_QUERY_RAPORU.md](docs/API_INVALID_QUERY_RAPORU.md).
+
+## Hamster Event Arena
+
+`/arena` (ve `/arena/`) bağımsız, isteğe bağlı 60 saniyelik oyundur. Başlat/devam et, duraklat ve yeniden başlat düğmelerini kullanın. Ok tuşları/WASD ile hareket edin veya yön düğmelerine tıklayın. Her tohum 10 puan verir. Odak kaybolunca tur duraklar.
+
+Varsayılan DEMO modunda örnek olay düğmeleri açıkça etiketlidir. Settlement 8 saniye çift puan, günlük mesafe olayı 8 saniye hız verir; aynı tür tekrar gelirse süre 8 saniyeye yenilenir. Canlı mod mevcut doğrulanmış sağlayıcıyı kullanır: başlangıç/geçmiş olaylar bonus üretmez. API hatası oyunu engellemez ve demo bonuslarına otomatik geçilmez. HTTP 400 / invalid_query çözülmedi. Tur duraklatıldığında oyun ve bonus süreleri donar; tur dışında gelen olaylar uygulanmaz.
+
+OBS Browser Source URL'sine `/arena` adresini ekleyin, 1280×900 kullanın. Kaynağa sağ tıklayıp Interact/Etkileşim açın; oyun alanına odaklanıp klavye veya düğmelerle oynayın. Arena kendi opak sahnesini içerir. Gerçek OBS testi ve gerçek canlı olay etkisi doğrulanmadı.
+
+Arena geliştirmesi için otomatik Vercel dal deployment'ı kapatıldı; bu commit için Preview/Production yayını yetkilendirilmedi.

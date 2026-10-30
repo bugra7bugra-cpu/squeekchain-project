@@ -1,3 +1,4 @@
+import { Arena } from './ArenaPage';
 import { StrictMode, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -153,4 +154,6 @@ function ControlPanel() {
     </main>
   </div>;
 }
-createRoot(document.getElementById('root')!).render(<StrictMode>{isOverlay ? <OverlayPage /> : <ControlPanel />}</StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode>{window.location.pathname.replace(/\/$/, "") === "/arena" ? <Arena /> : isOverlay ? <OverlayPage /> : <ControlPanel />}</StrictMode>);
+
+
