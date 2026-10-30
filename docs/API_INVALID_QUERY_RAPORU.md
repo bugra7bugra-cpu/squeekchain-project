@@ -56,3 +56,7 @@ HTTP hata durumunda kısa makine hata kodu güvenli biçimde okunur; `HTTP 400 /
 ## 30 Ekim 2026 — ayrı istemci bulgusu
 
 Arena Chromium doğrulamasında native fetch fonksiyonunun `this.request(...)` ile provider nesnesine bağlanması, isteği ağ katmanından önce kesebilen bir çağrı hatası olarak yeniden üretildi. İstek artık receiver bağlamını taşımayan sarmalayıcıdan çağrılıyor; sahte HTTP 400/invalid_query yanıtı tarayıcıda doğru gösterildi. Bu yerel istemci düzeltmesi, daha önce kullanıcı tarafından bildirilen uzak HTTP 400'ün nedeni veya çözümü olarak sunulamaz. Gerçek endpoint yeniden denenmedi; sunucu log karşılaştırması gereksinimi sürüyor.
+
+## Son kullanıcı doğrulaması — 30 Ekim 2026
+
+Kullanıcı güncel İngilizce Preview'da canlı mod için Last API check successful gördüğünü bildirdi. Bu, önceki HTTP 400/invalid_query gözleminden sonraki başarılı bir kontrol kaydıdır; hata sebebinin bulunduğu, neden düzelmiş olduğu veya kalıcı çözüm kanıtı değildir. Yeni gerçek olayın overlay bildirimi ya da Arena bonusu üretmesi henüz doğrulanmadı. Bu oturumda gerçek API isteği tekrarlanmadı. Sunucu incelemesiyle ilişkilendirilecek kök neden bilinmiyor; tekrar hata olursa mevcut rapor ve hassas bilgilerden arındırılmış zaman/request kayıtları kullanılmalı.

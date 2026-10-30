@@ -1,10 +1,18 @@
 # Squeekchain Genesis — 7 fazlık proje planı
 
-> Durum: Faz 7 Preview hazırlığı tamam; Vercel yetkisi ve gerçek kullanım kanıtı beklemede · 30 Ekim 2026
+> Durum: Faz 7 son teslim/başvuru hazırlığı; kullanıcı Preview, OBS overlay ve Arena oynanışını doğruladı. Yeni gerçek olay ve başvuru koşulları beklemede · 30 Ekim 2026
 > Amaç: Squeekchain'e gerçekten bağlı çalışan bir ürün geliştirmek, yayınlamak ve Genesis Code Lane başvurusuna hazırlanmak.
 > `AGENTS.md` kalıcı çalışma kurallarıdır; bu dosya **hangi sırayla ne yapacağımızı** anlatır.
 
-## Şu an bildiklerimiz
+## Güncel son teslim kaydı
+
+Son kullanıcı doğrulaması: İngilizce Preview ve panel/Arena açılıyor; Arena oynanıyor, puan toplanıyor, normal tarayıcıda DEMO çift puan ve hız çalışıyor. Gerçek OBS Browser Source overlay bildirimi ve mavi zemin üzerinde şeffaflık doğrulandı. OBS Interact içinde Arena oynanıp puan toplandı; küçük pencerede bonus düğmeleri görünmediği için OBS bonusları ayrıca doğrulanmadı.
+
+Canlı modda “Last API check successful” görüldü (kullanıcı beyanı). Yeni gerçek olayın overlay bildirimi veya Arena bonusu üretmesi açık. Önceki HTTP 400/invalid_query ve ayrı ağ vekili 403 tarihsel kayıtları korunur; neden değiştiği veya kalıcı çözüm kanıtlanmadı. Aşağıdaki eski faz kayıtları bu yeni kanıtı geçersiz kılmaz.
+
+Başvuru paketi docs/GENESIS_BASVURU_HAZIRLIGI.md içinde. Resmî Code Lane/form erişilemedi; alan adı, GitHub ve sahiplik yöntemi kesinleştirilemedi. Faz 7 tamamlandı sayılmaz. Bu görev belge/PR güncellemesidir; uygulama kodu değiştirilmedi, önceki testler yeniden çalıştırılmadı. Yeni deployment, merge, DNS/cüzdan işlemi veya başvuru yok.
+
+## Önceki planlama bilgileri
 
 - Kullanıcı Genesis'e kayıtlı; ekran görüntüsünde 3 rozet, 382 Aura ve Silver seviyesi var. Bunlar **geçmiş bir anın bilgileri**.
 - Kullanıcı geliştirmeyi **tarayıcı üzerinden Codex + GitHub** ile yapmak istiyor; yerel Codex kurulumu şart değil.

@@ -2,7 +2,20 @@
 
 OBS yayınları için Squeekchain olaylarına tepki veren tarayıcı overlay'i ve kontrol paneli. React + TypeScript + Vite; backend, üyelik, cüzdan veya blockchain işlemi yok.
 
-**Demo ve API modları ayrıdır.** Demo örnek olaylar üretir; API modu gerçek `/v1/events` yanıtlarını doğrular. Bu bulut ortamında önceki tek bağlantı denemesi 403 verdi; gerçek API/CORS ve gerçek OBS uygulaması henüz doğrulanmadı. API hatasında demo açılmaz veya bağlantı aktifmiş gibi gösterilmez.
+**Demo ve API modları ayrıdır.** Demo örnek olaylar üretir; API modu `/v1/events` yanıtlarını doğrular. Son kullanıcı testinde canlı modda “Last API check successful” görüldü. Yeni gerçek olayın bildirim/bonus üretmesi henüz doğrulanmadı. Önceki HTTP 400/invalid_query gözleminin kök nedeni ve son başarılı kontrolün nedeni kanıtlanmadı; bulut ağ vekilinin 403 sonucu ayrı tarihsel kanıttır. API hatasında demo açılmaz.
+
+
+## Son teslim durumu — 30 Ekim 2026
+
+Aşağıdakiler son kullanıcı mesajında doğrulandı; bu oturumda bağımsız tekrar testi yapılmadı:
+
+- Güncel İngilizce Vercel Preview, ana panel ve /arena açılıyor; Arena oynanıyor ve puan toplanıyor.
+- Normal tarayıcıda DEMO double score ve speed boost çalışıyor.
+- Gerçek OBS Browser Source içinde /overlay bildirim gösteriyor; şeffaflık mavi arka planla doğrulandı.
+- Arena OBS Interact içinde oynandı ve puan toplandı. Küçük Interact penceresinde bonus düğmeleri görünmedi; OBS bonus testi ayrıca yapılmadı. Pencereyi büyütüp aşağı kaydırarak düğmelere erişilebilir.
+- Canlı modda “Last API check successful” görüldü; yeni gerçek olayın bildirim veya bonus üretmesi beklemede. Başarının kök nedeni hakkında iddia yok.
+
+Güncel Preview URL bu devirde paylaşılmadı; eski URL'nin güncel sürüme ait olduğu varsayılmıyor. Son başvuru metni, URL alanı, resmî kaynak sınırları ve manuel adımlar: [Genesis hazırlık paketi](docs/GENESIS_BASVURU_HAZIRLIGI.md). Başvuru, merge veya yeni deployment yapılmadı. Aşağıdaki eski test kayıtları kendi oturumlarının tarihsel kanıtıdır; bu özet güncel kullanıcı sonucudur.
 
 ## Kurulum ve kontroller
 
@@ -46,7 +59,7 @@ Kaynak: https://docs.squeekchain.com/developers/api/ — aşağıdaki bilgiler k
 
 ## OBS'de kullanıcı tarafından yapılacak gerçek kullanım testi
 
-Gerçek OBS bu ortamda kurulu değil. Chromium testleri OBS testi sayılmaz.
+Kullanıcı gerçek OBS overlay/şeffaflık ve Arena oynanışını doğruladı. Aşağıdaki liste ek regresyon kontrolüdür; tüm maddelerin tek tek tamamlandığı iddia edilmez. Chromium ve kullanıcı OBS sonuçları ayrı kanıtlardır.
 
 - Overlay'i OBS Browser Source olarak 1920×1080 ekle; altına renkli görüntü koy. Boş alanlarda alttaki görüntü görünmeli; demo etiketi görünür kalmalı.
 - Panelden demo URL'si üret; iki tetikleyici, 3 ve 10 saniye süre, 0 ve 5 saniye bekleme, dört köşe ve yazı boyutunu dene. Her değişiklikte OBS URL'sini yenile.
@@ -58,7 +71,7 @@ Gerçek OBS bu ortamda kurulu değil. Chromium testleri OBS testi sayılmaz.
 
 `vercel.json`: Vite, `npm ci`, `dist` çıktısı; `/overlay` ve `/overlay/` → `/index.html` rewrite. Asset URL'leri rewrite edilmez. CSP yalnızca yerel scriptlere ve Squeekchain API bağlantısına izin verir; satır içi stiller React görünüm ayarları için açıktır. Referrer gönderilmez; kamera/mikrofon/konum kapalıdır. Bunlar gerçek Vercel'de henüz doğrulanmadı.
 
-Git otomatik yayınları yalnızca `feat/faz4-demo` dalı için açıktır. Ek build koruması hem `VERCEL_ENV=preview` hem `VERCEL_GIT_COMMIT_REF=feat/faz4-demo` gerektirir; Production veya başka dal derlemesi bilinçli olarak başarısız olur. Gelecekte Production ancak ayrı kullanıcı onayıyla bu koruma değiştirilerek hazırlanabilir.
+Git otomatik yayınları kapalıdır (Arena geliştirmesinde kapatıldı). Ek build koruması hem `VERCEL_ENV=preview` hem `VERCEL_GIT_COMMIT_REF=feat/faz4-demo` gerektirir; Production veya başka dal derlemesi bilinçli olarak başarısız olur. Gelecekte Production ancak ayrı kullanıcı onayıyla bu koruma değiştirilerek hazırlanabilir.
 
 İlk hazırlık oturumunda Vercel aracı/CLI, token, CLI oturumu veya `.vercel/project.json` yoktu. Preview sonradan kullanıcı tarafından açıldı; bu ortamdan yönetim bağlantısı hâlâ mevcut değil. Vercel yetkisi güvenli bağlantı üzerinden sağlanmalı; token chat'e veya repoya yazılmamalı. `.vercel/` Git dışında tutulur.
 
@@ -94,10 +107,10 @@ Chromium farklı konumdaysa `SQUEEK_CHROMIUM` değişkenini uyarlayın. `SQUEEK_
 
 Kullanıcı parametresiz endpoint'in `invalid_query`, `category=all&limit=40` sorgusunun ise geçerli JSON döndürdüğünü kendi tarayıcısında doğruladı. Sağlayıcı bu sabit parametreli adresi kullanır; testler ilk ve ETag'li isteklerin aynı URL'ye gitmesini kontrol eder. Available yanıtında category ve activeEventTypes alanları da doğrulanır; ek alanlar olay gösterimine aktarılmaz. Unavailable yanıtı boş feed olarak yorumlanmaz.
 
-Fixture ve kaynak sınırı: [tests/fixtures/README.md](tests/fixtures/README.md). Şema, başlangıç, tekrar önleme, 304, 429, 503 ve kesinti sonrası toparlanma dahil 24 test geçti. Fixture'lı testler gerçek API erişimi değildir. Preview bu ortamdan tek denemede 403 verdi; sorun tekrar araştırılmadı. Kullanıcının doğrudan JSON erişimi doğrulaması, Preview kökeninden JavaScript fetch/CORS başarısı sayılmaz; o kontrol hâlâ bekliyor.
+Fixture ve kaynak sınırı: [tests/fixtures/README.md](tests/fixtures/README.md). Şema, başlangıç, tekrar önleme, 304, 429, 503 ve kesinti sonrası toparlanma dahil 24 test geçti. Fixture'lı testler gerçek API erişimi değildir. Preview bu ortamdan tek denemede 403 verdi; sorun tekrar araştırılmadı. Kullanıcının doğrudan JSON erişimi doğrulaması, Preview kökeninden JavaScript fetch/CORS başarısı sayılmaz; son kullanıcı testinde başarılı API kontrolü görüldü; yeni gerçek olayın gösterimi hâlâ bekliyor.
 
 
-## HTTP 400 / invalid_query tanısı
+## Tarihsel HTTP 400 / invalid_query tanısı
 
 Parametreli sorgunun uygulamada hâlâ 400 döndüğü kullanıcı tarafından bildirildi; URL kodlamasında hata bulunmadı. Navigasyon/fetch başlık farkının sunucuda neden olduğu henüz kanıtlanmadı; CORS kaynaklı olduğu varsayılmıyor. Uygulama artık HTTP kodunu ve güvenli kısa API hata kodunu gösterir (örneğin `HTTP 400 / invalid_query`). Bu, tanı iyileştirmesidir; gerçek API bağlantısını düzelttiği iddia edilmez. İnceleme ve sunucu ekibi için rapor: [docs/API_INVALID_QUERY_RAPORU.md](docs/API_INVALID_QUERY_RAPORU.md).
 
@@ -105,9 +118,9 @@ Parametreli sorgunun uygulamada hâlâ 400 döndüğü kullanıcı tarafından b
 
 `/arena` (ve `/arena/`) bağımsız, isteğe bağlı 60 saniyelik oyundur. Başlat/devam et, duraklat ve yeniden başlat düğmelerini kullanın. Ok tuşları/WASD ile hareket edin veya yön düğmelerine tıklayın. Her tohum 10 puan verir. Odak kaybolunca tur duraklar.
 
-Varsayılan DEMO modunda örnek olay düğmeleri açıkça etiketlidir. Settlement 8 saniye çift puan, günlük mesafe olayı 8 saniye hız verir; aynı tür tekrar gelirse süre 8 saniyeye yenilenir. Canlı mod mevcut doğrulanmış sağlayıcıyı kullanır: başlangıç/geçmiş olaylar bonus üretmez. API hatası oyunu engellemez ve demo bonuslarına otomatik geçilmez. HTTP 400 / invalid_query çözülmedi. Tur duraklatıldığında oyun ve bonus süreleri donar; tur dışında gelen olaylar uygulanmaz.
+Varsayılan DEMO modunda örnek olay düğmeleri açıkça etiketlidir. Settlement 8 saniye çift puan, günlük mesafe olayı 8 saniye hız verir; aynı tür tekrar gelirse süre 8 saniyeye yenilenir. Canlı mod mevcut doğrulanmış sağlayıcıyı kullanır: başlangıç/geçmiş olaylar bonus üretmez. API hatası oyunu engellemez ve demo bonuslarına otomatik geçilmez. Önceki HTTP 400 / invalid_query sonrasında kullanıcı başarılı API kontrolü gördü; kök neden veya kalıcı düzelme doğrulanmadı. Tur duraklatıldığında oyun ve bonus süreleri donar; tur dışında gelen olaylar uygulanmaz.
 
-OBS Browser Source URL'sine `/arena` adresini ekleyin, 1280×900 kullanın. Kaynağa sağ tıklayıp Interact/Etkileşim açın; oyun alanına odaklanıp klavye veya düğmelerle oynayın. Arena kendi opak sahnesini içerir. Gerçek OBS testi ve gerçek canlı olay etkisi doğrulanmadı.
+OBS Browser Source URL'sine `/arena` adresini ekleyin, 1280×900 kullanın. Kaynağa sağ tıklayıp Interact/Etkileşim açın; oyun alanına odaklanıp klavye veya düğmelerle oynayın. Arena kendi opak sahnesini içerir. Kullanıcı OBS Interact oynanış/puan testini doğruladı; OBS bonusları ve yeni gerçek canlı olay etkisi beklemede.
 
 Arena geliştirmesi için otomatik Vercel dal deployment'ı kapatıldı; bu commit için Preview/Production yayını yetkilendirilmedi.
 
@@ -115,7 +128,7 @@ Arena geliştirmesi için otomatik Vercel dal deployment'ı kapatıldı; bu comm
 
 Paneldeki **Hamster Event Arena oyna** bağlantısıyla veya `/arena` adresiyle açın. Mobil yön düğmelerini basılı tutun; bırakma/iptal hareketi durdurur. Başlat/devam et oyun alanına klavye odağı verir. Seçim kutusunda oklar kaynağı seçer; oyun karakterini hareket ettirmez. Sekme gizlenince veya pencere odağı kaybolunca tur duraklar. Süre yalnızca oyun saatiyle azalır; kontrol düğmeleri zamanı harcamaz. Canlı hata/stale/unavailable halinde etkin olay bonusları kaldırılır, normal oyun sürer.
 
-OBS için Browser Source boyutu 1280×900 önerilir. Interact penceresinde Başlat'a tıklayın, ok/WASD kullanın; gerekirse oyun alanına tıklayın. Interact kapanınca tur duraklar; tekrar açıp Devam et kullanın. Kaynak yeniden yüklenirse tur sıfırlanır. Panel ve arena ayrı sayfalardır; panel kapalıyken Arena çalışabilir. Arena opak bir oyun sahnesidir; mevcut `/overlay` şeffaf bildirim kaynağıdır. Gerçek OBS doğrulaması yayıncı ortamında beklemektedir.
+OBS için Browser Source boyutu 1280×900 önerilir. Interact penceresinde Başlat'a tıklayın, ok/WASD kullanın; gerekirse oyun alanına tıklayın. Interact kapanınca tur duraklar; tekrar açıp Devam et kullanın. Kaynak yeniden yüklenirse tur sıfırlanır. Panel ve arena ayrı sayfalardır; panel kapalıyken Arena çalışabilir. Arena opak bir oyun sahnesidir; mevcut `/overlay` şeffaf bildirim kaynağıdır. OBS overlay/şeffaflık ve Arena oynanış/puan kullanıcı tarafından doğrulandı; OBS bonusları beklemede.
 
 Tarayıcı testleri, uygulama bağımlılığı olmayan harici Playwright kurulumuyla çalışır:
 
@@ -130,8 +143,8 @@ node tests/overlay.browser.mjs
 
 Arena testi Playwright saatiyle tam 60 saniyelik turu, mobil yön kontrolünü ve sahte 400 yanıtını sınar. Fixture/mocked API sonuçları gerçek API bağlantısı değildir.
 
-### Mevcut Vercel projesinde yalnızca Preview
+### Tarihsel Preview hazırlık yönergesi (yeni yayın talimatı değildir)
 
-Bu oturumda Vercel CLI, oturum, proje bağlantısı veya VERCEL değişkenleri bulunmadı. Otomatik Git deployment kapalı kalır; Production build koruması korunur. Yetkili kullanıcı mevcut Vercel projesinde `feat/faz4-demo` dalının son commit'ini **Preview** hedefiyle yayınlamalı; yeni proje oluşturulmamalı ve Production branch değiştirilmemelidir. CLI kullanılıyorsa mevcut projeye `vercel link` ile bağlandıktan sonra `vercel --target=preview --build-env VERCEL_GIT_COMMIT_REF=feat/faz4-demo` çalıştırın; `--prod` kullanmayın. Build ortamının `VERCEL_ENV=preview` olduğunu doğrulayın. Production yetkisi yoktur.
+Bu oturumda Vercel CLI, oturum, proje bağlantısı veya VERCEL değişkenleri bulunmadı. Otomatik Git deployment kapalı kalır; Production build koruması korunur. Bu tarihsel yönerge yeni yayın yetkisi vermez. Mevcut kullanıcı doğrulamasında Preview zaten çalışıyor. Yetkili kullanıcı mevcut Vercel projesinde `feat/faz4-demo` dalının son commit'ini **Preview** hedefiyle yayınlamalı; yeni proje oluşturulmamalı ve Production branch değiştirilmemelidir. CLI kullanılıyorsa mevcut projeye `vercel link` ile bağlandıktan sonra `vercel --target=preview --build-env VERCEL_GIT_COMMIT_REF=feat/faz4-demo` çalıştırın; `--prod` kullanmayın. Build ortamının `VERCEL_ENV=preview` olduğunu doğrulayın. Production yetkisi yoktur.
 
 Yayın sonrası oturumsuz `/`, `/arena`, `/arena/`, `/overlay`, `/overlay/` ve yenileme kontrol edilmeli; demo etiketleri, OBS Interact, şeffaf overlay ve Preview kökeninden API hatası ayrı kaydedilmelidir. README'deki eski Preview URL önceki kullanıcı beyanıdır; yeni Arena sürümünün yayın kanıtı değildir.
