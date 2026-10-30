@@ -59,8 +59,8 @@ function DataScene({ settings, event, preview = false }: { settings: Settings; e
 function Scene({ settings, event, preview = false }: { settings: Settings; event: DemoEvent | null; preview?: boolean }) {
   const style = { '--accent': settings.color, '--alert-size': `${settings.fontSize}px` } as CSSProperties;
   return <div className={`scene ${preview ? 'scene-preview' : 'scene-overlay'} ${settings.theme}`} style={style}>
-    <div className="scene-label">{settings.mode === 'demo' ? <><DemoBadge /><small>Canlı değil</small></> : <span className="demo-badge">CANLI — durum aşağıda</span>}</div>
-    {preview && !event && <div className="scene-placeholder"><PixelHamster /><span>{settings.mode === 'demo' ? 'Sahne senin. Bir demo olayı tetikle.' : 'Doğrulanmış canlı tetikleyici bekleniyor.'}</span></div>}
+    <div className="scene-label">{settings.mode === 'demo' ? <><DemoBadge /><small>Canlı değil</small></> : <span className="demo-badge">CANLI — Squeekchain</span>}</div>
+    {preview && !event && <div className="scene-placeholder"><PixelHamster /><span>{settings.mode === 'demo' ? 'Sahne senin. Bir demo olayı tetikle.' : 'Yeni Squeekchain olayı bekleniyor.'}</span></div>}
     <div className={`alert-position ${settings.position}`} role="status" aria-live="polite">
       {event && <article className="event-card" key={event.id}>
         <PixelHamster /><div><span className="event-eyebrow">{event.source === 'live' ? 'CANLI OLAY' : 'ÖRNEK OLAY'} / {event.kind}</span>
@@ -113,7 +113,7 @@ function ControlPanel() {
     <header className="topbar"><a className="brand" href="/"><PixelHamster /><span>SQUEEK<span className="brand-light"> / LIVE COMPANION</span></span></a><span className="version">YAYIN STÜDYOSU · v0.1</span></header>
     <main>
       <div className="intro"><div><p className="eyebrow">ZİNCİRİN RİTMİ, YAYININDA.</p><h1>Yayınına biraz<br /><em>Squeek</em> kat.</h1><p>Olayları görsel tepkilere dönüştür. Sahneni tasarla, OBS'ye ekle.</p></div>
-        <div className="mode-card"><label htmlFor="data-mode">Veri kaynağı</label><select id="data-mode" value={settings.mode} onChange={e => change('mode', e.target.value as Settings['mode'])}><option value="demo">Demo — örnek veri</option><option value="live">Canlı — doğrulama bekliyor</option></select>{settings.mode === 'demo' && <DemoBadge />}<p>Canlı hata durumunda demo açılmaz.</p></div></div>
+        <div className="mode-card"><label htmlFor="data-mode">Veri kaynağı</label><select id="data-mode" value={settings.mode} onChange={e => change('mode', e.target.value as Settings['mode'])}><option value="demo">Demo — örnek veri</option><option value="live">Canlı — Squeekchain olayları</option></select>{settings.mode === 'demo' && <DemoBadge />}<p>Canlı hata durumunda demo açılmaz.</p></div></div>
       {storageWarning && <p className="warning" role="status">{storageWarning}</p>}
       <div className="workspace">
         <section className="settings panel" aria-labelledby="settings-title"><div className="section-heading"><span className="step">01</span><h2 id="settings-title">Görünümünü ayarla</h2></div>

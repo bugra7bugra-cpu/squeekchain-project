@@ -47,10 +47,19 @@ Henüz deploy yapılmadı. Gelecekte statik sunucu, `/overlay` doğrudan açıl�
 
 Faz kararları ve sonraki işler: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md).
 
-## Faz 5 — canlı sağlayıcı (doğrulama engeli var)
+## Faz 5 — canlı sağlayıcı
 
-`LiveDataProvider`, GET `/v1/events`, ETag/304, Retry-After/429, hata geri çekilmesi, unavailable ve stale durumlarını işler. İlk yanıt ve kesinti sonrası ilk başarılı yanıt yalnızca başlangıç noktasıdır; geçmiş olaylar oynatılmaz. ID tekrarları elenir. Panel ve overlay aynı sağlayıcı/hook kullanır. Canlı mod hatasında demo açılmaz; demo düğmesi canlı modda devre dışıdır.
+Panel ve bağımsız overlay aynı LiveDataProvider/hook akışını kullanır. Kullanıcının resmî API belgelerinden başka ortamda doğrulayarak aktardığı bilgilerle şu yapılandırma etkinleştirildi (burada bağımsız doğrulama yapılmadı):
 
-Resmî belge ve API isteği 403 ile engellendi. Kullanıcının aktardığı `events[].id/type/occurredAt`, `schemaVersion` ve unavailable bilgileri kullanıldı. **Desteklenen schemaVersion değeri, olay türü adları, polling/stale süreleri ve tam yanıt/sayfalama şeması henüz doğrulanmadı.** Bu nedenle `src/live.ts` içindeki `verifiedContract` null: canlı seçiminde açıklayıcı bloke durumu gösterilir, ağ isteği ve gerçek tetikleyici başlatılmaz. Resmî sözleşme tamamlanmadan bu kilit kaldırılmamalı. Alan adları veya sürüm uydurulmadı; canlı entegrasyon tamamlandı sayılmaz.
+- GET `https://api.squeekchain.com/v1/events`, sayısal `schemaVersion: 3`, `status: available | unavailable`.
+- Olay alanları: string `id`, `type`, ISO 8601 `occurredAt`, sayısal tamsayı `eventVersion`.
+- Tetikleyiciler: `system.settlement_completed` sürüm 2; `measurement.daily_distance_milestone` sürüm 1. Diğer tür/sürümler bildirim üretmez.
+- Kaynak feed önbelleği 5 saniye; uygulama her tamamlanan isteğin ardından 15 saniye bekler. Bu, aktarılan 5 istek/saniye ve burst 20 sınırlarının altındadır (panel ve overlay ayrı tüketicidir).
+- Uygulama tercihi olarak 45 saniye başarılı kontrol olmazsa stale gösterilir. Bu süre resmî API kuralı değildir.
+- ETag/If-None-Match/304 desteklenir; 429 ve 503 durumlarında Retry-After (saniye veya HTTP tarihi) ve geri çekilme uygulanır. HTTP 200 unavailable boş olay listesi sayılmaz.
+- İlk yanıt ve kesinti sonrası ilk başarılı yanıt başlangıç noktasıdır; geçmiş olaylar oynatılmaz. ID geçmişi en fazla 2.000 kayıt tutar. Silinen kayıtların zamanına veya öncesine ait olaylar tekrar oynatılmaz; bu bilinçli koruma çok geç gelen eski olayların da bastırılmasına neden olabilir.
+- Canlı bağlantı hatasında otomatik demo açılmaz. Canlı modda demo test düğmesi devre dışıdır. Varsayılan mod demo olarak kalır.
 
-`npm test` Node 24 ile bağımlılıksız sağlayıcı testlerini çalıştırır. Testlerdeki `test-only` şema sürümü, `test-event` olay türü ve kısa süreler yalnızca sentetik test değerleridir; resmî API iddiası değildir. Kuyruktaki son olayın gösterimi mevcut tek bildirim alanını kullanır; tam animasyon kuyruğu Faz 6 kapsamındadır. Önbelleğin güncelliği başarılı kontrol zamanıdır; olay zamanı tek başına ağ bağlantısı tazeliği sayılmaz.
+`npm test` Node 24 ile 10 bağımlılıksız sağlayıcı testi çalıştırır. Yanıt örnekleri aktarılan API biçimini kullanır; olaylar kurgusaldır ve test süreleri kısaltılmıştır. Eşzamanlı gelen olayların sonuncusu mevcut tek bildirim alanında gösterilir; tam animasyon kuyruğu Faz 6 kapsamındadır.
+
+API bağlantısı bu güncellemede **bir kez** denendi, HTTP 403 alındı. Gerçek API yanıtı, gerçek tarayıcı CORS bağlantısı ve canlı olayın uçtan uca gösterimi doğrulanamadı. Faz 5 canlı kabul kanıtı beklemededir. Sayfalama alanı doğrulanmadığından cursor/parametre uydurulmadı; yalnızca dönen feed sayfası işlenir.
