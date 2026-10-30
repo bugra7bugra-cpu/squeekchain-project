@@ -1,6 +1,6 @@
 # AGENTS.md — Squeekchain Genesis projesi
 
-> Durum: planlama aşaması. Ürün fikri ve başvuru kuralları henüz kesinleştirilmedi.
+> Durum: Squeek Live Companion MVP uygulandı; Faz 7 Preview yayını ve gerçek kullanım doğrulaması aşamasında. Başvuru şartlarının eksik doğrulamaları sürüyor.
 > Bu dosya Codex'in proje boyunca uyması gereken kurallardır. Fazların ayrıntıları `docs/FAZ_PLANI.md` dosyasında.
 
 ## 1. Bu projede ne yapıyoruz?
@@ -14,7 +14,7 @@ Squeekchain ekosistemi için gerçek bir işe yarayan, özgün ve çalışan kü
 - Mümkünse Buildooooor / Early Buildooooor rozetlerini kazanmak; **rozet garantisi verme**
 - Bunu yaparken kullanıcının neyi, nerede ve neden yaptığımızı öğrenmesini sağlamak
 
-**Ürün henüz seçilmedi.** İlk aday, canlı hamster/zincir olaylarına tepki veren etkileşimli bir yayın aracı (Squeek Live Companion). Bu fikir, kullanıcı onayı olmadan kesin gereksinim sayılmamalı. Yalnızca veri gösteren dashboard/explorer türü bir MVP önermemeliyiz.
+**Seçilen ürün: Squeek Live Companion.** Kullanıcı olaylara tepki veren yayın aracı, kontrol paneli ve bağımsız OBS overlay kapsamını onayladı. Demo ve salt okunur API modları ayrıdır; gerçek bağlantı ve OBS doğrulaması yapılmadan çalıştığı iddia edilmez. Ürün yalnızca veri gösteren dashboard/explorer değildir.
 
 ## 2. Çalışma şeklimiz
 
@@ -64,7 +64,7 @@ Resmî sayfalar yüklenmiyorsa başvuru koşullarını, akıllı sözleşme adre
 
 ## 5. Kod kalitesi
 
-Teknoloji seçimi Faz 3'te kesinleşecek. Basit tarayıcı uygulaması için ön aday: **TypeScript + React + Vite**. Kullanıcı kabul etmeden bu seçimi kalıcı hale getirme.
+Faz 3'te kullanıcı tarafından onaylanan teknoloji: **TypeScript + React + Vite**. Mevcut uygulama bu teknolojiyle geliştirildi; yeni altyapı gerektirmeden sürdür.
 
 Uygulama kodu başladığında:
 - Anlaşılır dosya ve fonksiyon isimleri kullan, gereksiz soyutlamalardan kaçın.

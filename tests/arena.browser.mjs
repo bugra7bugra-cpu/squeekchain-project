@@ -1,0 +1,43 @@
+/* global window, document, Event */
+import assert from 'node:assert/strict';
+import process from 'node:process';
+import console from 'node:console';
+const {chromium}=await import(process.env.SQUEEK_PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({executablePath:process.env.SQUEEK_CHROMIUM});
+const base=process.env.SQUEEK_TEST_URL||'http://127.0.0.1:5180';
+const errors=[];
+try {
+ const context=await browser.newContext({viewport:{width:1280,height:900}});
+ let page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+ await page.clock.install();await page.goto(base);await page.getByRole('link',{name:/Play Hamster Event Arena/}).click();
+ const time=()=>page.getByTestId('time').textContent();
+ const x=()=>page.locator('.arena-hamster').evaluate(el=>parseFloat(el.style.left));
+ await page.getByRole('button',{name:'Start / resume'}).click();
+ await page.keyboard.down('ArrowRight');await page.clock.runFor(800);await page.keyboard.up('ArrowRight');
+ assert.ok(Number(await page.getByTestId('score').textContent())>=10);
+ await page.getByRole('button',{name:'Pause',exact:true}).click();const paused=await time();
+ await page.clock.runFor(2000);assert.equal(await time(),paused);
+ await page.getByRole('button',{name:'Start / resume'}).click();
+ await page.getByRole('button',{name:'DEMO: 8s double score'}).click();assert.ok((await page.locator('main').innerText()).includes('Score ×2'));
+ await page.getByRole('button',{name:'DEMO: 8s speed boost'}).click();assert.ok((await page.locator('main').innerText()).includes('boosted'));
+ await page.clock.runFor(8100);assert.ok((await page.locator('main').innerText()).includes('Score ×1'));
+ await page.getByRole('button',{name:'Restart'}).click();assert.equal(await time(),'60');assert.equal(await page.getByTestId('score').textContent(),'0');
+ await page.getByRole('button',{name:'Start / resume'}).click();await page.clock.fastForward(60020);assert.equal(await time(),'0');await page.getByText('Round over',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Restart'}).click();
+ await page.close();const network=await browser.newContext();page=await network.newPage();page.on('pageerror',e=>errors.push(e.message));await page.route('https://api.squeekchain.com/**',route=>route.fulfill({status:400,headers:{'Access-Control-Allow-Origin':'*'},contentType:'application/json',body:'{"error":"invalid_query"}'}));
+ await page.goto(base+'/arena');await page.getByLabel('Event source').selectOption('live');
+ await page.getByText(/HTTP 400 \/ invalid_query/).waitFor();assert.equal(await page.getByRole('button',{name:/DEMO:/}).count(),0);
+ await page.getByRole('button',{name:'Start / resume'}).click();await page.keyboard.down('d');await new Promise(resolve=>setTimeout(resolve,500));await page.keyboard.up('d');assert.ok(await x()>50);
+ await page.evaluate(()=>window.dispatchEvent(new Event('blur')));const frozen=await time();await new Promise(resolve=>setTimeout(resolve,1100));assert.equal(await time(),frozen);
+ await network.close();await context.close();
+ const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const m=await mobile.newPage();m.on('pageerror',e=>errors.push(e.message));await m.clock.install();await m.goto(base+'/arena/');
+ assert.ok(await m.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+ await m.getByRole('button',{name:'Start / resume'}).click();
+ const right=m.getByRole('button',{name:'Right',exact:true});await right.scrollIntoViewIfNeeded();const box=await right.boundingBox();
+ await m.mouse.move(box.x+box.width/2,box.y+box.height/2);await m.mouse.down();await m.clock.runFor(800);await m.mouse.up();
+ assert.ok(Number(await m.getByTestId('score').textContent())>=10);
+ const stopped=await m.locator('.arena-hamster').getAttribute('style');await m.clock.runFor(300);assert.equal(await m.locator('.arena-hamster').getAttribute('style'),stopped);
+ await m.reload();await m.getByRole('heading',{name:'Hamster Event Arena'}).waitFor();await mobile.close();assert.deepEqual(errors,[]);
+ console.log('Arena Chromium: keyboard, score, timer, pause/reset, demo effects, HTTP 400, mobile controls/layout passed. Mock API only; no real OBS/API claim.');
+} finally {await browser.close();}
