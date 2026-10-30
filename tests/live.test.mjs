@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { URL } from 'node:url';
 import assert from 'node:assert/strict';
-import { LiveDataProvider, parseEvents, retryDelay, verifiedContract, EventHistory } from '../src/live.ts';
+import { LiveDataProvider, parseEvents, retryDelay, verifiedContract, EventHistory, eventsUrl, readApiError } from '../src/live.ts';
 // Source-relayed real response structure. The missing actual ID is a synthetic fixture ID.
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/events.available.json', import.meta.url), 'utf8'));
 // Polling durations alone are shortened for tests.
@@ -101,4 +101,33 @@ test('connection recovery seeds a new baseline instead of replaying backlog',asy
     return response(calls===1?[event('initial')]:calls===3?[event('backlog')]:[event('backlog'),event('fresh')]);
   }).start(s=>states.push(s));
   try {await until(()=>states.some(s=>s.events.length));assert.ok(states.some(s=>s.state==='error'));assert.deepEqual(states.flatMap(s=>s.events.map(e=>e.id)),['fresh']);}finally{stop();}
+});
+
+test('query values are unambiguous and not HTML/double encoded',()=>{
+  const url=new URL(eventsUrl);
+  assert.equal(url.origin,'https://api.squeekchain.com');
+  assert.equal(url.pathname,'/v1/events');
+  assert.deepEqual([...url.searchParams],[['category','all'],['limit','40']]);
+});
+test('HTTP 400 exposes invalid_query and produces no events',async()=>{
+  const states=[];
+  const stop=new LiveDataProvider(contract,async()=>new Response(JSON.stringify({error:'invalid_query'}),{status:400})).start(s=>states.push(s));
+  try {
+    await until(()=>states.some(s=>s.state==='error'));
+    const failure=states.find(s=>s.state==='error');
+    assert.equal(failure.httpStatus,400);assert.equal(failure.apiError,'invalid_query');
+    assert.match(failure.message,/HTTP 400 \/ invalid_query/);
+    assert.deepEqual(states.flatMap(s=>s.events),[]);
+  }finally{stop();}
+});
+test('error body is bounded and only short machine codes are surfaced',async()=>{
+  assert.equal(await readApiError(new Response('{"error":"invalid_query"}')),'invalid_query');
+  for(const text of ['<html>error</html>','{"error":"<script>"}',JSON.stringify({error:'x'.repeat(65)}),'x'.repeat(5000)]) {
+    assert.equal(await readApiError(new Response(text)),undefined);
+  }
+});
+test('HTTP errors without JSON preserve status',async()=>{
+  const states=[];
+  const stop=new LiveDataProvider(contract,async()=>new Response('<html>bad gateway</html>',{status:502})).start(s=>states.push(s));
+  try {await until(()=>states.some(s=>s.state==='error'));const error=states.find(s=>s.state==='error');assert.equal(error.httpStatus,502);assert.equal(error.apiError,undefined);assert.match(error.message,/HTTP 502/);}finally{stop();}
 });

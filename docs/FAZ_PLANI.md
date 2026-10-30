@@ -197,6 +197,13 @@ Kullanıcı Preview yayınının açıldığını, panel ve demoların çalışt
 
 ## Faz 7 — Parametreli events sorgusu düzeltmesi
 
-Kullanıcının kendi tarayıcısında doğruladığı `GET /v1/events?category=all&limit=40` adresi sağlayıcıda kullanılıyor; parametresiz isteğin invalid_query sorunu giderildi. Available yanıtında category=all ve activeEventTypes:string[] doğrulaması eklendi. schemaVersion=3, gerekli olay alanları, başlangıç/baseline, ID tekrar önleme, ETag/304, 429/503 Retry-After ve hata toparlanması korunuyor.
+Kullanıcının kendi tarayıcısında doğruladığı `GET /v1/events?category=all&limit=40` adresi sağlayıcıda kullanılıyor; parametresiz çağrı kaldırıldı; bu değişikliğin uzaktaki invalid_query sorununu çözdüğü bağımsız doğrulanmadı. Available yanıtında category=all ve activeEventTypes:string[] doğrulaması eklendi. schemaVersion=3, gerekli olay alanları, başlangıç/baseline, ID tekrar önleme, ETag/304, 429/503 Retry-After ve hata toparlanması korunuyor.
 
 Aktarılan gerçek örnek yapısının minimal fixture'ı eklendi; paylaşılmayan ID kurgusal test ID'si olarak açıkça belgelendi. 24 test, TypeScript, lint ve build geçti. Preview erişimi bir kez denendi, ağ vekilinde 403 verdi; yayımlanan kökenden gerçek API isteği yapılamadı. Doğrudan JSON erişimi ile JavaScript fetch/CORS doğrulaması ayrı tutuluyor; gerçek yeni olayın gösterimi henüz doğrulanmış değil. Yeni özellik, merge, production veya başvuru yok.
+
+
+## Faz 7 — HTTP 400 invalid_query teşhisi
+
+Kullanıcı parametreli GET için de HTTP 400/error=invalid_query, aynı URL navigasyonu için başarılı JSON bildirdi. Kod ve URL testleri query bozukluğu bulmadı. Tek kontrollü uzak istek API'ye ulaşmadan ağ vekilinde 403 aldı; daha fazla header/query denemesi yapılmadı. Yerel Chromium karşılaştırması Origin ve Accept farkını gösterdi; bunun uzak sunucudaki neden olduğu doğrulanmadı. CORS kök neden olarak varsayılmadı; no-cors/proxy/header taklidi eklenmedi.
+
+Uygulamada HTTP durum kodu ve kısa API hata kodu görünürlüğü iyileştirildi; sunucu metni güvenli sınırlarla okunuyor. 28 test, TypeScript, lint, build ve Chromium alfa/URL/demo/hata regresyonu geçti. Sunucu ekibi raporu docs/API_INVALID_QUERY_RAPORU.md içinde. Canlı API sorunu çözülmüş sayılmaz; sonraki adım hassas bilgilerden arındırılmış başarılı navigasyon/başarısız fetch kayıtlarının sunucu loglarıyla karşılaştırılmasıdır. Merge, production ve başvuru yok.

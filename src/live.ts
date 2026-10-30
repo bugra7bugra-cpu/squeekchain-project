@@ -34,7 +34,8 @@ export class EventHistory {
 }
 export const liveBlocker = 'Canlı mod bloke: şema sürümü, olay türleri ve polling kuralı henüz doğrulanmadı.';
 export type LiveState = 'blocked' | 'loading' | 'ready' | 'empty' | 'unavailable' | 'stale' | 'error' | 'rate-limited';
-export interface LiveSnapshot { state: LiveState; message: string; events: LiveEvent[]; lastChecked?: number }
+export interface HttpDiagnostic { httpStatus?: number; apiError?: string }
+export interface LiveSnapshot extends HttpDiagnostic { state: LiveState; message: string; events: LiveEvent[]; lastChecked?: number }
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
@@ -63,6 +64,36 @@ export function retryDelay(value: string | null, now: number, fallback: number):
   return Number.isFinite(delay) ? Math.max(fallback, delay) : fallback;
 }
 
+// Keep only a short machine-readable error code, never arbitrary server text/HTML.
+export async function readApiError(response: Response): Promise<string | undefined> {
+  const reader = response.body?.getReader();
+  if (!reader) return;
+  let text = '';
+  let length = 0;
+  const decoder = new TextDecoder();
+  try {
+    while (true) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > 4096) return;
+      text += decoder.decode(value, {stream:true});
+    }
+    const value: unknown = JSON.parse(text + decoder.decode());
+    if (record(value) && typeof value.error === 'string' && /^[a-zA-Z0-9_-]{1,64}$/.test(value.error)) return value.error;
+  } catch { /* Missing/malformed error bodies do not hide the HTTP status. */ }
+  finally { await reader.cancel().catch(() => {}); }
+}
+class HttpRequestError extends Error {
+  httpStatus: number;
+  apiError?: string;
+  constructor(status: number, code?: string) {
+    super(`API isteği reddedildi: HTTP ${status}${code ? ` / ${code}` : ''}. Otomatik tekrar için bekleniyor; demo açılmadı.`);
+    this.httpStatus = status;
+    this.apiError = code;
+  }
+}
+
 export class LiveDataProvider {
   private contract: LiveContract | null;
   private request: typeof fetch;
@@ -88,14 +119,14 @@ export class LiveDataProvider {
     let failures = 0;
     let current: LiveSnapshot = { state: 'loading', message: 'Canlı veriye bağlanılıyor.', events: [] };
     onSnapshot(current);
-    const publish = (state: LiveState, message: string, events: LiveEvent[] = []) => {
-      current = { state, message, events, lastChecked: this.lastChecked };
+    const publish = (state: LiveState, message: string, events: LiveEvent[] = [], diagnostic: HttpDiagnostic = {}) => {
+      current = { state, message, events, lastChecked: this.lastChecked, ...diagnostic };
       if (this.running) onSnapshot(current);
     };
     const staleTimer = setInterval(() => {
       if (this.lastChecked !== undefined && Date.now() - this.lastChecked >= c.staleMs && current.state !== 'stale') {
         this.baseline = false;
-        publish('stale', 'Son veri kontrolü gecikti; bildirimler durduruldu.');
+        publish('stale', `Son veri kontrolü gecikti; bildirimler durduruldu.${current.httpStatus ? ` Son hata: HTTP ${current.httpStatus}${current.apiError ? ` / ${current.apiError}` : ''}.` : ''}`, [], {httpStatus:current.httpStatus, apiError:current.apiError});
       }
     }, Math.min(c.staleMs, 1000));
     const poll = async () => {
@@ -112,9 +143,10 @@ export class LiveDataProvider {
           failures++;
           delay = retryDelay(response.headers.get('Retry-After'), Date.now(), Math.min(c.pollMs * 2 ** Math.min(failures, 6), 3600000));
           this.baseline = false;
-          publish(response.status === 429 ? 'rate-limited' : 'unavailable', `HTTP ${response.status}; yeniden denemeden önce bekleniyor.`);
+          const code = await readApiError(response);
+          publish(response.status === 429 ? 'rate-limited' : 'unavailable', `HTTP ${response.status}${code ? ` / ${code}` : ''}; yeniden denemeden önce bekleniyor.`, [], {httpStatus:response.status,apiError:code});
         } else {
-          if (response.status !== 304 && !response.ok) throw new Error(`HTTP ${response.status}`);
+          if (response.status !== 304 && !response.ok) throw new HttpRequestError(response.status, await readApiError(response));
           const events = response.status === 304 ? this.cache : parseEvents(await response.json(), c);
           if (response.status === 304 && !this.cache) throw new Error('304 için geçerli önbellek yok.');
           if (!events) {
@@ -138,7 +170,7 @@ export class LiveDataProvider {
         failures++;
         this.baseline = false;
         delay = Math.min(c.pollMs * 2 ** Math.min(failures, 6), 3600000);
-        publish('error', error instanceof Error && error.message.startsWith('HTTP ') ? `API isteği reddedildi (${error.message}). Bağlantı doğrulanamadı; otomatik olarak bekleniyor.` : 'API verisi alınamadı veya doğrulanamadı. Bağlantı ve veri biçimi kontrol edilmeli; demo açılmadı.');
+        publish('error', error instanceof HttpRequestError ? error.message : 'API verisi alınamadı veya doğrulanamadı. Ağ/CORS veya yanıt biçimi incelenmeli; neden henüz doğrulanmadı. Demo açılmadı.', [], error instanceof HttpRequestError ? {httpStatus:error.httpStatus,apiError:error.apiError} : {});
       } finally {
         clearTimeout(timeout);
         if (this.running) timer = setTimeout(poll, Math.min(delay, 2147483647));

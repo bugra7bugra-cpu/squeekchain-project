@@ -95,3 +95,8 @@ Chromium farklı konumdaysa `SQUEEK_CHROMIUM` değişkenini uyarlayın. `SQUEEK_
 Kullanıcı parametresiz endpoint'in `invalid_query`, `category=all&limit=40` sorgusunun ise geçerli JSON döndürdüğünü kendi tarayıcısında doğruladı. Sağlayıcı bu sabit parametreli adresi kullanır; testler ilk ve ETag'li isteklerin aynı URL'ye gitmesini kontrol eder. Available yanıtında category ve activeEventTypes alanları da doğrulanır; ek alanlar olay gösterimine aktarılmaz. Unavailable yanıtı boş feed olarak yorumlanmaz.
 
 Fixture ve kaynak sınırı: [tests/fixtures/README.md](tests/fixtures/README.md). Şema, başlangıç, tekrar önleme, 304, 429, 503 ve kesinti sonrası toparlanma dahil 24 test geçti. Fixture'lı testler gerçek API erişimi değildir. Preview bu ortamdan tek denemede 403 verdi; sorun tekrar araştırılmadı. Kullanıcının doğrudan JSON erişimi doğrulaması, Preview kökeninden JavaScript fetch/CORS başarısı sayılmaz; o kontrol hâlâ bekliyor.
+
+
+## HTTP 400 / invalid_query tanısı
+
+Parametreli sorgunun uygulamada hâlâ 400 döndüğü kullanıcı tarafından bildirildi; URL kodlamasında hata bulunmadı. Navigasyon/fetch başlık farkının sunucuda neden olduğu henüz kanıtlanmadı; CORS kaynaklı olduğu varsayılmıyor. Uygulama artık HTTP kodunu ve güvenli kısa API hata kodunu gösterir (örneğin `HTTP 400 / invalid_query`). Bu, tanı iyileştirmesidir; gerçek API bağlantısını düzelttiği iddia edilmez. İnceleme ve sunucu ekibi için rapor: [docs/API_INVALID_QUERY_RAPORU.md](docs/API_INVALID_QUERY_RAPORU.md).
