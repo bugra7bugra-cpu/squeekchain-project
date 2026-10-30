@@ -9,8 +9,8 @@ export interface DemoEvent {
 }
 export interface DemoDataSource { next(): DemoEvent }
 const samples = [
-  { kind: 'sample-block', title: 'Yeni bir ritim!', message: 'Örnek blok olayı yayınına ulaştı.' },
-  { kind: 'sample-hamster', title: 'Hamster iş başında!', message: 'Örnek hamster hareketi algılandı.' },
+  { kind: 'system.settlement_completed', title: 'Yeni bir ritim!', message: 'Örnek blok olayı yayınına ulaştı.' },
+  { kind: 'measurement.daily_distance_milestone', title: 'Hamster iş başında!', message: 'Örnek hamster hareketi algılandı.' },
 ] as const;
 export function createDemoSource(): DemoDataSource {
   let sequence = 0;

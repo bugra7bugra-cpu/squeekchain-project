@@ -132,7 +132,7 @@ export class LiveDataProvider {
         failures++;
         this.baseline = false;
         delay = Math.min(c.pollMs * 2 ** Math.min(failures, 6), 3600000);
-        publish('error', error instanceof Error ? error.message : 'Bağlantı hatası.');
+        publish('error', error instanceof Error && error.message.startsWith('HTTP ') ? `API isteği reddedildi (${error.message}). Bağlantı doğrulanamadı; otomatik olarak bekleniyor.` : 'API verisi alınamadı veya doğrulanamadı. Bağlantı ve veri biçimi kontrol edilmeli; demo açılmadı.');
       } finally {
         clearTimeout(timeout);
         if (this.running) timer = setTimeout(poll, Math.min(delay, 2147483647));

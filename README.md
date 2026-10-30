@@ -1,65 +1,57 @@
 # Squeek Live Companion
 
-Squeekchain temalı, OBS Browser Source için demo yayın aracı. **Bu sürüm yalnızca örnek veri kullanır; gerçek API, cüzdan veya blockchain işlemi içermez.**
+OBS yayınları için Squeekchain olaylarına tepki veren tarayıcı overlay'i ve kontrol paneli. React + TypeScript + Vite; backend, üyelik, cüzdan veya blockchain işlemi yok.
 
-## Geliştirme
+**Demo ve API modları ayrıdır.** Demo örnek olaylar üretir; API modu gerçek `/v1/events` yanıtlarını doğrular. Bu bulut ortamında önceki tek bağlantı denemesi 403 verdi; gerçek API/CORS ve gerçek OBS uygulaması henüz doğrulanmadı. API hatasında demo açılmaz veya bağlantı aktifmiş gibi gösterilmez.
 
-Node.js 22.12+ veya 24 LTS ve npm gerekir (Node 24 ile doğrulandı).
+## Kurulum ve kontroller
+
+Node 24 LTS ve npm kullanın (testlerde Node'un TypeScript strip desteği gerekir).
 
 ```sh
 npm ci
 npm run dev
-```
-
-Terminalde verilen yerel adreste kontrol paneli, `/overlay` yolunda şeffaf overlay açılır.
-
-```sh
 npm run typecheck
 npm run lint
+npm test
 npm run build
 npm run preview
 ```
 
-## Kullanım
+Panel `/`, şeffaf overlay `/overlay` yolundadır. Statik barındırmada `/overlay` doğrudan açılışı için `index.html` SPA fallback gereklidir. Henüz deploy yapılmadı.
 
-1. Tema, vurgu rengi, dört köşeden bildirim konumu ve 16–36 px yazı boyutunu seç.
-2. **Demo olayını dene** ile örnek blok ve hamster bildirimlerini sırayla oynat. Bildirim 4,5 saniye görünür; yeni test öncekinin yerine geçer.
-3. Overlay bağlantısını kopyala. Kopyalama izni yoksa bağlantı alanını seçip elle kopyala.
-4. OBS'de Kaynaklar → + → Tarayıcı ekle. URL'yi yapıştır; genişlik 1920, yükseklik 1080 kullan.
-5. Overlay kendi başına 8 saniyede bir örnek olay oynatır. **DEMO — örnek veri** etiketi yayında görünür kalır.
+## Yayıncı iş akışı
 
-Ayarlar panelin tarayıcısında localStorage ile saklanır. OBS ayrı bir tarayıcı oturumudur: otomatik ayar eşitlemesi yoktur. Değişiklikten sonra yeni URL'yi OBS'ye yapıştır. Paneldeki test düğmesi OBS'ye komut göndermez. URL, yalnızca doğrulanan görünüm ayarlarını ve demo modunu fragment içinde taşır; gizli bilgi içermez. Desteklenmeyen veya bozuk URL ayarlarında overlay hata gösterir.
+1. Tema, renk, dört köşeden konum ve 16–36 px yazı boyutunu seç.
+2. Bildirim süresini **3–10 saniye**, bildirimler arasındaki sessiz beklemeyi **0–30 saniye** ayarla. Bekleme önceki bildirim kapandıktan sonra başlar. Süre değişikliği bir sonraki bildirimde uygulanır.
+3. **Hesaplaşma tamamlandı** ve **Günlük mesafe kilometre taşı** tetikleyicilerini ayrı ayrı aç/kapat. Demo da aynı filtreleri ve kuyruğu kullanır. Kapatılan tür aktifse kaldırılır; bekleyenler de temizlenir.
+4. Demo test butonu sırayla iki örnek olay üretir. Sık basarak kuyruğu deneyebilirsin. Kuyruk en fazla **5 bekleyen olay + ekrandaki olay** tutar; taşmada en eski bekleyen olay düşer, ekrandaki yarıda kesilmez. Aynı ID yeniden sıraya alınmaz.
+5. Bağlantıyı kopyala; kopyalama izni yoksa URL alanını seçip elle kopyala. Ayarlar yerel saklanır; eski v1 URL/kayıtları yeni alanlara varsayılanlar eklenerek okunur. Bozuk ayarlar veya desteklenmeyen sürüm açıklayıcı hata verir.
+6. OBS'de Kaynaklar → + → Tarayıcı ekle; URL'yi yapıştır, **1920×1080** kullan. Overlay demo modunda bağımsız olarak 8 saniyede bir örnek olay üretir; API modunda kendi salt okunur sağlayıcısını çalıştırır.
+7. Ayar değiştirince **yeni URL'yi OBS'ye yapıştır**. OBS ile panelin localStorage alanı veya oturumu ortak varsayılmaz. Panel kapatılabilir; paneldeki test düğmesi OBS'ye komut yollamaz.
 
-## Kontrol senaryoları
+URL fragment'ı yalnızca izin verilen görünüm, süre, tetikleyici ve veri modu ayarlarını taşır. Gizli bilgi içermez. Demo etiketi panel ve overlay'de kalıcıdır. API seçimi bağlantı başarısı değildir: son doğrulanmış kontrol ve hata durumu görünür. Bildirimlerin HTML olarak yorumlanması, özel CSS/JS yükleme ve ses yok. Klavye odağı görünür; hareket azaltma tercihinde animasyon kapanır.
 
-- Panelde demo düğmesine bas: örnek bildirim görünmeli ve sonra kaybolmalı.
-- Ayarları değiştirip sayfayı yenile: seçimler korunmalı; URL değişmeli.
-- Üretilen URL'yi ayrı tarayıcı oturumunda aç: panel kapalıyken örnek olaylar sürmeli; zemin şeffaf olmalı.
-- 390 px mobil genişlikte panel yatay taşmamalı; tüm alanlar kullanılabilmeli.
-- Bozuk fragment veya desteklenmeyen sürüm hata vermeli; bozuk yerel kayıt varsayılanlarla kurtarılmalı.
-- Hareket azaltma tercihinde animasyon kapalı olmalı.
+## API sözleşmesi ve sınırlar
 
-Faz 4'te Chromium ile panel, mobil, ayar saklama, kopyalama, bağımsız overlay, şeffaflık ve geçersiz ayar kurtarma kontrol edildi. Gerçek OBS uygulaması testi henüz yapılmadı. Canlı API davranışı test edilmedi; Faz 5 kapsamındadır.
+Kaynak: https://docs.squeekchain.com/developers/api/ — aşağıdaki bilgiler kullanıcı tarafından başka ortamda doğrulanarak aktarıldı; bağımsız doğrulama iddiası yok.
 
-## Yayınlama notu
+- GET `https://api.squeekchain.com/v1/events`; sayısal `schemaVersion: 3`, `status: available | unavailable`.
+- Olaylar: string `id/type`, ISO 8601 `occurredAt`, tamsayı `eventVersion`.
+- Tetikleyiciler: `system.settlement_completed` v2; `measurement.daily_distance_milestone` v1. Diğer tür/sürümler bildirim üretmez.
+- Feed cache 5 saniye; her tamamlanan isteğin ardından 15 saniye polling beklemesi. Limit 5 istek/s, burst 20. Panel/overlay bağımsız tüketicidir.
+- ETag/If-None-Match/304, 429/503 Retry-After ve hata geri çekilmesi desteklenir. HTTP 200 unavailable sıfır veri değildir. Son başarılı kontrolün 45 saniye geride kalması uygulama tercihi olarak stale sayılır.
+- İlk yanıt ve kesinti sonrası ilk başarılı yanıt başlangıç noktasıdır; geçmiş olaylar topluca oynatılmaz. Hatalarda aktif/bekleyen canlı bildirimler temizlenir.
+- Sağlayıcı ID geçmişi 2.000 kayıtla sınırlıdır; silinen kayıt zamanından eski olaylar tekrar oynatılmaz. Bu, çok geç gelen eski olayları da bastırabilir. Sayfalama alanları doğrulanmadığından parametre uydurulmadı; dönen feed sayfası işlenir.
 
-Henüz deploy yapılmadı. Gelecekte statik sunucu, `/overlay` doğrudan açılışında `index.html` dosyasına SPA fallback sağlamalı. OBS'nin kullanacağı URL yayıncı bilgisayarından erişilebilir olmalı; bulut geliştirme ortamının localhost adresi yayıncının bilgisayarı değildir.
+## OBS'de kullanıcı tarafından yapılacak gerçek kullanım testi
 
-Faz kararları ve sonraki işler: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md).
+Gerçek OBS bu ortamda kurulu değil. Chromium testleri OBS testi sayılmaz.
 
-## Faz 5 — canlı sağlayıcı
+- Overlay'i OBS Browser Source olarak 1920×1080 ekle; altına renkli görüntü koy. Boş alanlarda alttaki görüntü görünmeli; demo etiketi görünür kalmalı.
+- Panelden demo URL'si üret; iki tetikleyici, 3 ve 10 saniye süre, 0 ve 5 saniye bekleme, dört köşe ve yazı boyutunu dene. Her değişiklikte OBS URL'sini yenile.
+- Paneli kapat; overlay örnek olayları üretmeye devam etmeli. Kaynağı yenile ve sahneyi değiştirip geri dön; OBS'nin kaynak kapatma/yenileme ayarına göre akışın yeniden başladığını kontrol et.
+- Demo etiketi kayıt/çıktıda okunmalı; arka plan şeffaf, bildirimler kenarlardan taşmadan görünmeli. 1080p dışında kullandığın çözünürlükte de dene.
+- API modunda bağlantı yokken hata görünmeli, örnek olay oynatılmamalı. Erişim olan ortamda ilk yanıt geçmişi oynatmamalı; yeni gerçek olay tek bildirim üretmeli. Bu son kontrol henüz yapılmadı.
 
-Panel ve bağımsız overlay aynı LiveDataProvider/hook akışını kullanır. Kullanıcının resmî API belgelerinden başka ortamda doğrulayarak aktardığı bilgilerle şu yapılandırma etkinleştirildi (burada bağımsız doğrulama yapılmadı):
-
-- GET `https://api.squeekchain.com/v1/events`, sayısal `schemaVersion: 3`, `status: available | unavailable`.
-- Olay alanları: string `id`, `type`, ISO 8601 `occurredAt`, sayısal tamsayı `eventVersion`.
-- Tetikleyiciler: `system.settlement_completed` sürüm 2; `measurement.daily_distance_milestone` sürüm 1. Diğer tür/sürümler bildirim üretmez.
-- Kaynak feed önbelleği 5 saniye; uygulama her tamamlanan isteğin ardından 15 saniye bekler. Bu, aktarılan 5 istek/saniye ve burst 20 sınırlarının altındadır (panel ve overlay ayrı tüketicidir).
-- Uygulama tercihi olarak 45 saniye başarılı kontrol olmazsa stale gösterilir. Bu süre resmî API kuralı değildir.
-- ETag/If-None-Match/304 desteklenir; 429 ve 503 durumlarında Retry-After (saniye veya HTTP tarihi) ve geri çekilme uygulanır. HTTP 200 unavailable boş olay listesi sayılmaz.
-- İlk yanıt ve kesinti sonrası ilk başarılı yanıt başlangıç noktasıdır; geçmiş olaylar oynatılmaz. ID geçmişi en fazla 2.000 kayıt tutar. Silinen kayıtların zamanına veya öncesine ait olaylar tekrar oynatılmaz; bu bilinçli koruma çok geç gelen eski olayların da bastırılmasına neden olabilir.
-- Canlı bağlantı hatasında otomatik demo açılmaz. Canlı modda demo test düğmesi devre dışıdır. Varsayılan mod demo olarak kalır.
-
-`npm test` Node 24 ile 10 bağımlılıksız sağlayıcı testi çalıştırır. Yanıt örnekleri aktarılan API biçimini kullanır; olaylar kurgusaldır ve test süreleri kısaltılmıştır. Eşzamanlı gelen olayların sonuncusu mevcut tek bildirim alanında gösterilir; tam animasyon kuyruğu Faz 6 kapsamındadır.
-
-API bağlantısı bu güncellemede **bir kez** denendi, HTTP 403 alındı. Gerçek API yanıtı, gerçek tarayıcı CORS bağlantısı ve canlı olayın uçtan uca gösterimi doğrulanamadı. Faz 5 canlı kabul kanıtı beklemededir. Sayfalama alanı doğrulanmadığından cursor/parametre uydurulmadı; yalnızca dönen feed sayfası işlenir.
+Faz planı: [docs/FAZ_PLANI.md](docs/FAZ_PLANI.md). Faz 7, deploy ve başvuru bu çalışmaya dahil değildir.

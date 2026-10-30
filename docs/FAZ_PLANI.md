@@ -1,6 +1,6 @@
 # Squeekchain Genesis — 7 fazlık proje planı
 
-> Durum: Faz 3 MVP kararları kesinleşti · 30 Ekim 2026
+> Durum: Faz 6 uygulandı; gerçek API/OBS kullanım kanıtı beklemede · 30 Ekim 2026
 > Amaç: Squeekchain'e gerçekten bağlı çalışan bir ürün geliştirmek, yayınlamak ve Genesis Code Lane başvurusuna hazırlanmak.
 > `AGENTS.md` kalıcı çalışma kurallarıdır; bu dosya **hangi sırayla ne yapacağımızı** anlatır.
 
@@ -118,7 +118,7 @@ Bu bir kabul doğrulaması değildir: güncel tam kriterler, özgünlük değerl
 
 ## Faz 5 — Doğrulanmış veri sağlayıcı ve tetikleyici
 
-**Durum:** Canlı yapılandırma kullanıcının başka ortamda resmî API belgesinden doğrulayarak aktardığı bilgilerle etkinleştirildi; bağımsız kaynak doğrulaması iddia edilmiyor. schemaVersion=3 (number), available/unavailable, eventVersion kontrolü ve iki tetikleyici: system.settlement_completed v2 / measurement.daily_distance_milestone v1. Polling 15 saniye; feed cache 5 saniye, limit 5 istek/s burst 20. Stale eşiği uygulama tercihi olarak 45 saniye. ETag/304, 429 ve 503 Retry-After, hata geri çekilmesi, başlangıç/kesinti sonrası geçmişi atlama korunuyor. ID geçmişi 2.000 ile sınırlı; silinen zaman aralığındaki eski olaylar tekrar oynatılmaz. Demo modu korunuyor. On kurgusal API yanıtlı sağlayıcı testi, TypeScript, lint ve build geçti. Tek canlı API isteği HTTP 403 verdi; gerçek bağlantı/CORS ve olayın uçtan uca gösterimi doğrulanamadı. Bu nedenle Faz 5'in canlı kabul kanıtı beklemede; Faz 6 başlamadı. Sayfalama alanları bilinmediği için uydurulmadı.
+**Durum:** Canlı yapılandırma kullanıcının başka ortamda resmî API belgesinden doğrulayarak aktardığı bilgilerle etkinleştirildi; bağımsız kaynak doğrulaması iddia edilmiyor. schemaVersion=3 (number), available/unavailable, eventVersion kontrolü ve iki tetikleyici: system.settlement_completed v2 / measurement.daily_distance_milestone v1. Polling 15 saniye; feed cache 5 saniye, limit 5 istek/s burst 20. Stale eşiği uygulama tercihi olarak 45 saniye. ETag/304, 429 ve 503 Retry-After, hata geri çekilmesi, başlangıç/kesinti sonrası geçmişi atlama korunuyor. ID geçmişi 2.000 ile sınırlı; silinen zaman aralığındaki eski olaylar tekrar oynatılmaz. Demo modu korunuyor. On kurgusal API yanıtlı sağlayıcı testi, TypeScript, lint ve build geçti. Tek canlı API isteği HTTP 403 verdi; gerçek bağlantı/CORS ve olayın uçtan uca gösterimi doğrulanamadı. Bu nedenle Faz 5'in canlı kabul kanıtı beklemede; Faz 5 kod tarafı kullanıcı tarafından onaylandı; gerçek API kabul kanıtı hâlâ beklemede. Sayfalama alanları bilinmediği için uydurulmadı.
 
 1. Erişilebilir resmî belgeler veya açıkça aktarılmış kaynak kaydı üzerinden gereken en az endpoint, şema, olay kimliği, veri tazeliği ve tarayıcı erişim gerekliliklerini belirle. Bilinmeyenleri engel olarak kaydet; aynı ağ engelini tekrar araştırma.
 2. Canlı sağlayıcıyı demo sağlayıcıyla ortak arayüze bağla; çalışma zamanı şema doğrulaması, büyük tamsayılar, önbellek ve hız sınırlarını uygula.
@@ -129,7 +129,9 @@ Bu bir kabul doğrulaması değildir: güncel tam kriterler, özgünlük değerl
 
 ## Faz 6 — Yayıncı iş akışını tamamla
 
-**Durum:** Başlanmadı; faz geçişleri kullanıcı onayına bağlı.
+**Durum:** Kullanıcı onayıyla uygulandı. Beş bekleyen olay + aktif bildirim kuyruğu, taşmada en eski bekleyeni düşürme, 3–10 sn süre ve 0–30 sn sessiz aralık, iki bağımsız tetikleyici filtresi eklendi. Aynı ayarlar demo, önizleme ve bağımsız overlay üzerinde ortak kuyruk/çizim mantığıyla uygulanır. Mod değişimi ve canlı hatası kuyruğu temizler. API seçimi bağlantı başarısı sayılmaz; doğrulanmayan bağlantıda “API bağlantısı doğrulanmadı” gösterilir. Arayüz, piksel animasyonu, klavye odağı, reduced-motion ve mobil görünüm iyileştirildi; yeni kütüphane eklenmedi. Eski v1 URL/kayıtları yeni varsayılanlarla taşınır; geçersiz alanlar reddedilir.
+
+**Kontrol kanıtı:** 17 birim testi (10 sağlayıcı + 7 kuyruk/ayar), TypeScript, ESLint ve build başarılı. Chromium masaüstü/mobil: süre/aralık, kuyruk, tetikleyiciler, mod geçişi, sahte API hatası, saklama, URL, klavye, reduced-motion, şeffaflık ve panel kapalı bağımsız demo doğrulandı. Sahte API yanıtı gerçek bağlantı kanıtı değildir. 403 tekrar araştırılmadı. Gerçek OBS kurulu değil; README'de yayıncı test listesi var. Gerçek API olayı ve gerçek OBS yayını doğrulanmadığı için uçtan uca kabul beklemede. Faz 7'ye geçilmedi.
 
 1. **6A:** Kontrol paneli, tema/renk/konum/boyut ayarları ve ortak önizlemeyi tamamla; ayarları sürümlü sakla.
 2. **6B:** Efekt, bildirim kuyruğu, süre/minimum aralık ve tetikleyici aç/kapat davranışını tamamla. Hareket azaltma tercihini destekle; hızlı yanıp sönen efekt kullanma.
@@ -166,7 +168,7 @@ Yapılacaklar:
 | MVP | Olaya tepki, ayar/önizleme paneli, bağımsız OBS overlay | 3 — kesinleşti |
 | Teknoloji | React + TypeScript + Vite; statik frontend | 3 — kesinleşti |
 | Veri saklama / eşitleme | Yerel ayarlar + OBS URL yapılandırma kopyası; backend yok | 3 — kesinleşti |
-| Gerçek tetikleyiciler | En az bir; endpoint ve alanlar resmî şemaya göre seçilecek | 5 — açık |
+| Gerçek tetikleyiciler | Aktarılan şemaya göre iki tür/sürüm bağlı; gerçek API yanıtıyla doğrulama bekliyor | 5 — kullanım kanıtı açık |
 | Code Lane kabul / form / domain / DNS | Kısmi bilgi; gönderimden önce doğrulanmalı | 2 / 7 — açık |
 | Tester / sözleşmeler | Ağ engeli nedeniyle ertelendi; MVP blockchain işlemi içermiyor | 1 — ertelendi |
 | Rozetler ve erken sıra | Garanti yok; güncel profil ve koşullar gerekli | 7 — açık |

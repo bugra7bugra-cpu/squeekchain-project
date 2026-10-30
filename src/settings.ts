@@ -7,10 +7,14 @@ export interface Settings {
   color: string;
   position: Position;
   fontSize: number;
+  duration: number;
+  gap: number;
+  settlement: boolean;
+  milestone: boolean;
 }
 export const defaults: Settings = {
   version: 1, mode: 'demo', theme: 'dark', color: '#b9f568',
-  position: 'bottom-left', fontSize: 24,
+  position: 'bottom-left', fontSize: 24, duration: 5, gap: 2, settlement: true, milestone: true,
 };
 export const storageKey = 'squeek-companion.settings.v1';
 
@@ -29,8 +33,16 @@ export function parseSettings(raw: string): Settings {
       s.fontSize < 16 || s.fontSize > 36) {
     throw new Error('Ayarlar geçersiz veya sürüm desteklenmiyor. Panelden yeni URL oluştur.');
   }
+  // Missing new fields migrate old v1 URLs/settings without losing appearance.
+  const duration = s.duration === undefined ? defaults.duration : s.duration;
+  const gap = s.gap === undefined ? defaults.gap : s.gap;
+  const settlement = s.settlement === undefined ? defaults.settlement : s.settlement;
+  const milestone = s.milestone === undefined ? defaults.milestone : s.milestone;
+  if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 3 || duration > 10 ||
+      typeof gap !== 'number' || !Number.isInteger(gap) || gap < 0 || gap > 30 ||
+      typeof settlement !== 'boolean' || typeof milestone !== 'boolean') throw new Error('Bildirim ayarları geçersiz.');
   return { version: 1, mode: s.mode, theme: s.theme, color: s.color,
-    position: s.position as Position, fontSize: s.fontSize };
+    position: s.position as Position, fontSize: s.fontSize, duration, gap, settlement, milestone };
 }
 export function readStoredSettings(): Settings {
   const saved = localStorage.getItem(storageKey);

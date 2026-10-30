@@ -6,6 +6,7 @@ import type { DemoEvent } from './demo';
 import { defaults, overlayUrl, parseSettings, positions, readStoredSettings, storageKey } from './settings';
 import type { Settings } from './settings';
 import { useLive } from './useLive';
+import { NotificationQueue } from './queue';
 import './styles.css';
 
 const positionNames = { 'top-left': 'Sol üst', 'top-right': 'Sağ üst', 'bottom-left': 'Sol alt', 'bottom-right': 'Sağ alt' };
@@ -20,50 +21,58 @@ function PixelHamster() {
     <path fill="#f7adab" d="M3 9h3v2H3zm8 0h3v2h-3z" />
   </svg>;
 }
-function useDemo(auto: boolean) {
+function useDemo(auto: boolean, mode: Settings['mode']) {
   const source = useRef(createDemoSource());
   const [event, setEvent] = useState<DemoEvent | null>(null);
   useEffect(() => {
-    if (!auto) return;
+    setEvent(null);
+    if (!auto || mode !== 'demo') return;
     const first = window.setTimeout(() => setEvent(source.current.next()), 800);
     const interval = window.setInterval(() => setEvent(source.current.next()), 8000);
     return () => { clearTimeout(first); clearInterval(interval); };
-  }, [auto]);
-  useEffect(() => {
-    if (!event) return;
-    const timeout = window.setTimeout(() => setEvent(null), 4500);
-    return () => clearTimeout(timeout);
-  }, [event]);
+  }, [auto, mode]);
   return { event, trigger: () => setEvent(source.current.next()) };
 }
 function DataScene({ settings, event, preview = false }: { settings: Settings; event: DemoEvent | null; preview?: boolean }) {
   const live = useLive(settings.mode === 'live');
-  const [liveEvent, setLiveEvent] = useState<DemoEvent | null>(null);
+  const queue = useRef(new NotificationQueue<DemoEvent>());
+  const [frame, setFrame] = useState<{event: DemoEvent | null; waiting: number}>({event:null,waiting:0});
   useEffect(() => {
-    if (settings.mode !== 'live' || !['ready', 'empty'].includes(live.state)) {
-      setLiveEvent(null);
-      return;
-    }
-    const latest = live.events.at(-1);
-    if (!latest) return;
-    setLiveEvent({ id: latest.id, source: 'live', kind: latest.type,
-      title: 'Squeekchain olayı', message: latest.type, timestamp: latest.occurredAt });
-    const timeout = window.setTimeout(() => setLiveEvent(null), 4500);
-    return () => clearTimeout(timeout);
+    if (settings.mode === 'demo' && event) queue.current.enqueue([event]);
+  }, [event, settings.mode]);
+  useEffect(() => {
+    if (settings.mode !== 'live') return;
+    if (!['ready', 'empty'].includes(live.state)) { queue.current.clear(); return; }
+    queue.current.enqueue(live.events.map(item => ({ id:item.id, source:'live', kind:item.type,
+      title:item.type === 'system.settlement_completed' ? 'Hesaplaşma tamamlandı' : 'Günlük mesafe kilometre taşı',
+      message:'Squeekchain üzerinde yeni bir olay.', timestamp:item.occurredAt })));
   }, [live, settings.mode]);
-  return <><Scene settings={settings} event={settings.mode === 'demo' ? event : liveEvent} preview={preview} />
-    {settings.mode === 'live' && <div className="live-status" role="status">CANLI / {live.state} — {live.message}
-      {live.lastChecked && <span> Son kontrol: {new Date(live.lastChecked).toLocaleTimeString('tr-TR')}</span>}
-    </div>}</>;
+  useEffect(() => {
+    const update = () => setFrame(queue.current.tick(Date.now(), settings.duration * 1000, settings.gap * 1000,
+      item => item.kind === 'system.settlement_completed' ? settings.settlement : settings.milestone));
+    update();
+    const timer = window.setInterval(update, 100);
+    return () => clearInterval(timer);
+  }, [settings.duration, settings.gap, settings.settlement, settings.milestone]);
+  const healthy = settings.mode === 'live' && ['ready', 'empty'].includes(live.state);
+  const label = settings.mode === 'demo' ? 'DEMO — örnek veri' : healthy ? 'Son API kontrolü başarılı' : 'API bağlantısı doğrulanmadı';
+  return <div className={preview ? 'data-scene preview-data' : 'data-scene overlay-data'}>
+    <Scene settings={settings} event={settings.mode === 'live' && !healthy ? null : frame.event} preview={preview} label={label} />
+    <div className="scene-status" role="status">
+      {settings.mode === 'demo' ? `Örnek veri · ${frame.waiting}/5 bekliyor` : live.message}
+      {settings.mode === 'live' && live.lastChecked && <span> Son kontrol: {new Date(live.lastChecked).toLocaleTimeString('tr-TR')}</span>}
+    </div>
+  </div>;
 }
-function Scene({ settings, event, preview = false }: { settings: Settings; event: DemoEvent | null; preview?: boolean }) {
+
+function Scene({ settings, event, preview = false, label }: { settings: Settings; event: DemoEvent | null; preview?: boolean; label: string }) {
   const style = { '--accent': settings.color, '--alert-size': `${settings.fontSize}px` } as CSSProperties;
   return <div className={`scene ${preview ? 'scene-preview' : 'scene-overlay'} ${settings.theme}`} style={style}>
-    <div className="scene-label">{settings.mode === 'demo' ? <><DemoBadge /><small>Canlı değil</small></> : <span className="demo-badge">CANLI — Squeekchain</span>}</div>
+    <div className="scene-label">{settings.mode === 'demo' ? <><DemoBadge /><small>Canlı değil</small></> : <span className="demo-badge connection-badge">{label}</span>}</div>
     {preview && !event && <div className="scene-placeholder"><PixelHamster /><span>{settings.mode === 'demo' ? 'Sahne senin. Bir demo olayı tetikle.' : 'Yeni Squeekchain olayı bekleniyor.'}</span></div>}
     <div className={`alert-position ${settings.position}`} role="status" aria-live="polite">
       {event && <article className="event-card" key={event.id}>
-        <PixelHamster /><div><span className="event-eyebrow">{event.source === 'live' ? 'CANLI OLAY' : 'ÖRNEK OLAY'} / {event.kind}</span>
+        <PixelHamster /><div><span className="event-eyebrow">{event.source === 'live' ? 'ZİNCİR OLAYI' : 'ÖRNEK OLAY'} / {event.kind}</span>
           <strong>{event.title}</strong><p>{event.message}</p></div>
       </article>}
     </div>
@@ -71,14 +80,14 @@ function Scene({ settings, event, preview = false }: { settings: Settings; event
 }
 function OverlayPage() {
   const [config, setConfig] = useState<{ settings: Settings; error?: string }>(() => loadOverlay());
-  const { event } = useDemo(!config.error && config.settings.mode === 'demo');
+  const { event } = useDemo(!config.error, config.settings.mode);
   useEffect(() => {
     const update = () => setConfig(loadOverlay());
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
   if (config.error) return <div className="overlay-error"><DemoBadge /><p role="alert">{config.error}</p></div>;
-  return <DataScene key={config.settings.mode} settings={config.settings} event={event} />;
+  return <DataScene key={window.location.hash} settings={config.settings} event={event} />;
 }
 function loadOverlay(): { settings: Settings; error?: string } {
   try {
@@ -95,7 +104,7 @@ function ControlPanel() {
   const [settings, setSettings] = useState(initial.settings);
   const [storageWarning, setStorageWarning] = useState(initial.warning);
   const [copyStatus, setCopyStatus] = useState('');
-  const { event, trigger } = useDemo(false);
+  const { event, trigger } = useDemo(false, settings.mode);
   const url = overlayUrl(settings);
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify(settings)); }
@@ -121,11 +130,19 @@ function ControlPanel() {
           <label htmlFor="color">Vurgu rengi <span className="value">{settings.color}</span></label><div className="color-row"><input id="color" type="color" value={settings.color} onChange={e => change('color', e.target.value)} /><div className="swatches">{['#b9f568', '#83cfff', '#ffadce', '#f7cd73'].map(color => <button key={color} aria-label={`Vurgu rengi ${color}`} aria-pressed={settings.color === color} style={{ backgroundColor: color }} onClick={() => change('color', color)} />)}</div></div>
           <label htmlFor="position">Bildirim konumu</label><select id="position" value={settings.position} onChange={e => change('position', e.target.value as Settings['position'])}>{positions.map(p => <option key={p} value={p}>{positionNames[p]}</option>)}</select>
           <label htmlFor="font-size">Yazı boyutu <span className="value">{settings.fontSize} px</span></label><input id="font-size" type="range" min="16" max="36" value={settings.fontSize} onChange={e => change('fontSize', Number(e.target.value))} />
+          <fieldset className="notification-settings"><legend>Bildirim davranışı</legend>
+            <label htmlFor="duration">Ekranda kalma <span className="value">{settings.duration} sn</span></label>
+            <input id="duration" type="range" min="3" max="10" value={settings.duration} onChange={e => change('duration', Number(e.target.value))} />
+            <label htmlFor="gap">Bildirimler arası bekleme <span className="value">{settings.gap} sn</span></label>
+            <input id="gap" type="range" min="0" max="30" value={settings.gap} onChange={e => change('gap', Number(e.target.value))} />
+            <label className="toggle"><input type="checkbox" checked={settings.settlement} onChange={e => change('settlement', e.target.checked)} /> Hesaplaşma tamamlandı</label>
+            <label className="toggle"><input type="checkbox" checked={settings.milestone} onChange={e => change('milestone', e.target.checked)} /> Günlük mesafe kilometre taşı</label>
+          </fieldset>
           <p className="hint">Ayarlar bu tarayıcıda saklanır. Ses ve cüzdan bağlantısı kullanılmaz.</p>
         </section>
         <section className="preview-section" aria-labelledby="preview-title"><div className="preview-heading"><div className="section-heading"><span className="step">02</span><h2 id="preview-title">Sahnede nasıl duruyor?</h2></div><span className="preview-size">16:9 ÖNİZLEME</span></div>
           <div className="preview-frame"><DataScene key={settings.mode} settings={settings} event={event} preview /></div>
-          <div className="test-bar"><div><strong>Biraz hareket katalım.</strong><p>Örnek blok ve hamster olayları sırayla oynatılır.</p></div><button className="primary" disabled={settings.mode !== 'demo'} onClick={trigger}>▶ Demo olayını dene</button></div>
+          <div className="test-bar"><div><strong>Biraz hareket katalım.</strong><p>İki örnek olay, seçtiğin süre ve tetikleyici ayarlarıyla sıraya alınır.</p></div><button className="primary" disabled={settings.mode !== 'demo'} onClick={trigger}>▶ Demo olayını dene</button></div>
         </section>
       </div>
       <section className="obs panel" aria-labelledby="obs-title"><div className="section-heading"><span className="step">03</span><h2 id="obs-title">OBS'ye taşı</h2><span className="tag">BROWSER SOURCE</span></div>
