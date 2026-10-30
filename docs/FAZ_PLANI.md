@@ -1,6 +1,6 @@
 # Squeekchain Genesis — 7 fazlık proje planı
 
-> Durum: Taslak v1 · 30 Ekim 2026
+> Durum: Faz 3 MVP kararları kesinleşti · 30 Ekim 2026
 > Amaç: Squeekchain'e gerçekten bağlı çalışan bir ürün geliştirmek, yayınlamak ve Genesis Code Lane başvurusuna hazırlanmak.
 > `AGENTS.md` kalıcı çalışma kurallarıdır; bu dosya **hangi sırayla ne yapacağımızı** anlatır.
 
@@ -12,7 +12,9 @@
 - Squeekchain public API'si **okuma amaçlı**; gerçek zincir işlemleri ayrı güvenlik kuralları gerektiriyor.
 - Code Lane yalnızca basit veri panelleri yerine işe yarayan, özgün uygulamaları destekliyor (kullanıcının gösterdiği sayfa). Kesin başvuru ayrıntıları tekrar kontrol edilmeli.
 - Hedef rozetler: The Tester ve The Buildooooor; Early Buildooooor yalnızca koşulları hâlâ sağlanıyorsa. Hiçbiri garanti değil.
-- **Ürün seçimi henüz yapılmadı**. İlk aday: Squeek Live Companion (olaylara tepki veren interaktif yayın/OBS aracı).
+- **Seçilen ürün: Squeek Live Companion.** Kullanıcı, olaylara tepki veren yayın aracı ve React + TypeScript + Vite seçimini onayladı. Ayrıntılı kapsam Faz 3 bölümünde.
+- Kullanıcının son yönlendirmesi: Faz 1 ağ engeli nedeniyle ertelendi; Faz 2 kısmen araştırıldı. Eksik başvuru doğrulamaları gönderimden önce kapanacak. Aynı ağ engelleri tekrar araştırılmayacak.
+- `AGENTS.md` içindeki ürün/teknoloji aday ifadeleri önceki planlama durumunu yansıtır; kullanıcının son seçimi bu planda kayıtlıdır. Diğer güvenlik ve çalışma kuralları geçerlidir.
 
 ## Çalışma kuralı
 
@@ -31,7 +33,7 @@ Yapılacaklar:
 
 **Bitti sayılma şartı:** Şartlar ve denenen işlem belgelendi; işlem yapılmışsa hash/sonuç doğrulandı. Rozet verilmediyse "alındı" deme.
 
-**Durum:** [ ] Başlanmadı
+**Durum:** Ertelendi — ağ engeli; işlem ve rozet sonucu doğrulanmadı. Kullanıcının yeni yönlendirmesi olmadan yeniden araştırılmayacak.
 
 ## Faz 2 — Code Lane başvuru kurallarını doğrula
 
@@ -46,83 +48,96 @@ Yapılacaklar:
 
 **Bitti sayılma şartı:** Kullanıcının onayladığı, kanıta dayalı bir **başvuru kontrol listesi** var.
 
-**Durum:** [ ] Başlanmadı
+**Durum:** Kısmen araştırıldı (kullanıcı beyanı). Kesin kabul, form, sahiplik ve başvuru ayrıntıları gönderimden önce doğrulanacak; tamamlandı sayılmadı.
 
-## Faz 3 — Ürünü seç, MVP'yi kesinleştir
+## Faz 3 — Squeek Live Companion: kesinleşen MVP
 
-**Amaç:** Küçük ama gerçek işe yarayan tek bir ürün kararlaştırmak.
+**Durum:** Planlama tamamlandı. Kullanıcı ürün, üç temel özellik ve teknolojiyi seçti; uygulama geliştirmesine henüz başlanmadı. Sonraki faz için ayrıca kullanıcı onayı gerekir.
 
-Öncelikli aday: **Squeek Live Companion** — Squeekchain'in canlı durumuna ve olaylarına tepki veren, özelleştirilebilir bir yayın/OBS aracı. Bu **taslak fikir**, seçilmiş ürün değil.
+**Hedef kullanıcı:** Squeekchain temalı yayın yapan OBS kullanıcısı. Yayıncı olayları tek tek takip edip manuel efekt açmak yerine, seçtiği tetikleyicileri yayınının görsel tepkilerine dönüştürür.
 
-Alternatifler:
-- Hamster hareketlerine bağlı mini oyun
-- Sepolia'da doğrulanmış işlemleri kullanıcı onayıyla hazırlayan etkileşim aracı
+**Teknoloji:** React + TypeScript + Vite; statik tarayıcı uygulaması, CSS animasyonları. Küçük kapsam için backend, durum yönetimi kütüphanesi veya animasyon paketi gerekmiyor. Cüzdan bağlantısı yok.
 
-Karar verirken:
-1. Kullanıcı kim? Neyi gerçekten yapabilecek?
-2. Squeekchain verisi ürünün işlevini **nasıl değiştiriyor**?
-3. İlk sürümün en fazla 2–3 temel özelliği ne?
-4. Ne **yapmayacağız**? (üye sistemi, ödeme, NFT mintleme, token çıkarma vb. gereksizse yok)
-5. Seçilen teknoloji ne? Basit frontend için React + TypeScript + Vite başlangıç adayı.
-6. Code Lane kriterlerine gerçekten uyuyor mu?
+### Üç temel özellik ve kabul ölçütleri
 
-**Bitti sayılma şartı:** Kullanıcı tek bir proje fikrini, hedef kullanıcıyı, 2–3 MVP özelliğini ve teknoloji seçimini onayladı. Kısa bir MVP tanımı plana işlendi.
+1. **Olaya tepki veren animasyon ve bildirim:** Resmî API'nin doğrulanmış şemasının sunduğu en az bir gerçek olay/değişim, kısa görsel efekt ve metin bildirimi üretir. İlk sürüm en fazla iki tetikleyici türü içerir; hangileri olduğu Faz 5'te gerçek şemaya göre seçilir. Blok ilerlemesi veya hamster durum değişimi yalnızca adaydır; endpoint ve alan adları henüz doğrulanmadı. Aynı olay tekrar geldiğinde yeniden oynatılmaz. Kullanıcı tetikleyiciyi kapatabilir; bildirim süresi ve minimum aralığı ayarlanabilir. Ses ilk sürümde yok.
+2. **Kontrol paneli ve önizleme:** Tema (açık/koyu), vurgu rengi, bildirim konumu (dört köşe), yazı boyutu, süre ve tetikleyici aç/kapat ayarları. Efekt biçimi ilk sürümde tek bir kısa animasyonla sınırlı. Demo test düğmesi, veri durumu ve son güncelleme zamanı görünür. Ayarlar yerel olarak saklanır; farklı cihazlara otomatik eşitleme yok.
+3. **OBS overlay sayfası:** Şeffaf arka planlı, ayrı `/overlay` sayfası ve kopyalanabilir yapılandırılmış URL. 1920×1080 yayın alanı temel alınır; diğer boyutlarda taşma kontrol edilir. Kontrol paneli kapanınca overlay kendi veri akışıyla çalışır. Demo/bağlantı durumu yayına da görünür şekilde yansır; kaynağın durumu gizlenmez.
 
-**Durum:** [ ] Başlanmadı
+### Code Lane ile uyum: mevcut kanıt ve sınır
 
-## Faz 4 — GitHub ve Codex çalışma ortamını kur
+Mevcut plandaki, kullanıcının daha önce gösterdiği sayfaya dayanan bilgiye göre Code Lane işe yarayan özgün uygulamaları hedefler. Bu ürünün somut işi, olayları yayın efektine dönüştürmek ve OBS'ye kullanılabilir kaynak vermektir. Squeekchain verisi görünür davranışı belirlediği için bu hedefle uyumlu bir adaydır.
 
-**Amaç:** Bulut Codex'in doğru dosyaları okuduğu, temiz bir başlangıç oluşturmak.
+Bu bir kabul doğrulaması değildir: güncel tam kriterler, özgünlük değerlendirmesi, form ve sahiplik gereklilikleri bağımsız doğrulanmış değil. Gönderimden önce Faz 2 eksikleri kapanmalı. Yalnızca demo verili sürüm gerçek entegrasyonun kanıtı sayılmaz; en az bir doğrulanmış canlı tetikleyici ve OBS'de çalışma kanıtı gerekir. Rozet veya kabul garantisi yok.
 
-Yapılacaklar:
-1. GitHub deposunu oluştur veya mevcut boş depoyu belirle.
-2. `AGENTS.md` dosyasını **depo köküne**, bu planı `docs/FAZ_PLANI.md` konumuna koy.
-3. Tarayıcıdaki Codex çalışma alanına doğru GitHub deposunu bağla.
-4. Resmî Squeekchain skill'ini desteklenen ortamda kur (`npx skills add https://docs.squeekchain.com`); kurulamıyorsa resmî dokümanlarla ilerle.
-5. Ürün seçimine göre asgari iskeleti, `.gitignore` ve gerekliyse `.env.example` dosyasını oluştur.
-6. Basit geliştirme komutlarının çalıştığını kontrol et.
+### Ekranlar ve sorumluluklar
 
-**Bitti sayılma şartı:** Codex dosyaları okuyabiliyor; depo ve temel build/test akışı çalışıyor. Henüz özellik geliştirme yok.
+| Ekran / bileşen | Görev |
+|---|---|
+| `/` — ControlPanel | Ayarlar, canlı/demo seçimi, önizleme ve OBS kurulum yönergesi |
+| AppearanceControls / TriggerControls | Sınırları doğrulanan görünüm ve bildirim ayarları |
+| ConnectionStatus | Yükleniyor, veri yok, unavailable, hata, gecikmiş ve güncel veri durumları |
+| OverlayPreview / AlertRenderer | Gerçek overlay ile aynı çizim mantığı; önizlemede demo tetikleme |
+| ObsSetup | Overlay URL'sini üretme/kopyalama; OBS Browser Source'a ekleme, boyut ve yenileme adımları |
+| `/overlay` — OverlayPage | Şeffaf sahne, sınırlı bildirim kuyruğu, küçük veri kaynağı/durum etiketi |
+| DataSource / EventEngine | Canlı veya demo sağlayıcı, normalleştirme, tekrar önleme ve tetikleyici kuralları |
 
-**Durum:** [ ] Başlanmadı
+### Veri ve ayar akışı
 
-## Faz 5 — Resmî Squeekchain verisini bağla
+- Panel ayarları → doğrulanan, sürümlü yapılandırma → panel önizlemesi + localStorage. Gizli bilgi saklanmaz.
+- OBS URL'sinin fragment kısmı yalnızca görünüm, tetikleyici ve veri modu yapılandırmasının anlık kopyasını taşır; RPC, anahtar, cüzdan adresi veya özel metin taşımaz. Alanlar izin listesi ve boyut sınırıyla doğrulanır; bilinmeyen sürümde anlaşılır hata gösterilir.
+- OBS'nin tarayıcı depolaması panelden farklı olabilir. Bu yüzden localStorage/BroadcastChannel ile OBS'ye canlı eşitleme varsayılmaz. Ayar değişince yeni URL kopyalanıp OBS kaynağına yapıştırılır. Panel bunu açıkça anlatır.
+- Canlı sağlayıcı → şema doğrulama → normalleştirilmiş olay/değişim → EventEngine → sınırlı kuyruk → ortak AlertRenderer. Veri kaynağı ve zaman damgası bu akışta korunur.
+- İlk bağlantı anındaki veri başlangıç noktasıdır; eski olaylar topluca efekt üretmez. Poll sonuçları çakışmaz; tekrarlar resmî olay kimliğiyle, yoksa doğrulanmış kararlı alanlarla ayıklanır. Yeniden bağlantıda geçmiş bildirim yağmuru önlenir. Kuyruk en fazla 5 öğe tutar; taşan eski bildirimler düşürülür.
+- Panel açıkken tek sağlayıcı önizlemeyi besler; bağımsız OBS sayfası kendi sağlayıcısını kullanır. Her tüketici belgelenmiş hız sınırlarına uyar. Poll aralığı ve gecikmiş sayılma eşiği Faz 5'te resmî güncelleme sıklığına göre belirlenir; uydurma canlılık iddiası yok.
+- Canlı API için yayımlanan şema, schemaVersion, büyük tamsayılar, sayfalama ve ETag kuralları uygulanır. `429` durumunda Retry-After ve sınırlı geri çekilme kullanılır; sürekli hızlı tekrar yok. `unavailable` sıfır veri değildir. Son geçerli görüntü gecikmiş olarak işaretlenir ve yeni efekt üretimi durur.
+- Tarayıcıdan CORS/kimlik doğrulama desteği Faz 5'in ön koşuludur. Destek yoksa demo geliştirmesi sürer; kullanıcı onayı olmadan proxy/backend veya ağ aşma yöntemi eklenmez. Mevcut ağ engelini tekrar araştırmak ayrı görev değildir.
 
-**Amaç:** Uygulamanın gerçek Squeekchain verisine güvenilir biçimde bağlanması.
+### Açıkça etiketlenmiş demo modu
 
-Yapılacaklar:
-1. Seçilen ürün için gereken en az sayıda `/v1` endpoint'ini belirle; tüm API'yi entegre etmeye çalışma.
-2. Yayımlanmış yanıt şemasını kontrol ederek tipleri oluştur.
-3. `loading`, `unavailable`, `error`, `stale` ve geçerli veri durumlarını ayır.
-4. İstek sınırlarına, ETag/önbelleğe ve büyük tamsayı kurallarına uy.
-5. Gerekiyorsa önce sahte veri ile arayüz test et; sonra gerçek veriye geç. Sahte veriyi gerçekmiş gibi gösterme.
-6. Onchain işlem içeren özellik seçildiyse ayrı kullanıcı onayı, sözleşme doğrulaması ve simülasyon ekle.
+- API erişimi olmadan panel, önizleme ve OBS akışını geliştirmek için yerel, deterministik örnek olay dizisi kullanılacak. Bu, resmî API yanıtı olduğu iddia edilmeyen uygulama içi test verisidir.
+- Panel ve overlay üzerinde kalıcı **“DEMO — örnek veri, canlı değil”** etiketi bulunur. OBS URL'si demo modunu açıkça taşır; yenilemede etiket kaybolmaz.
+- Kullanıcı demo modunu seçer; canlı bağlantı hatasında sessizce demoya geçilmez. Hata ve “Demo modunu aç” seçeneği gösterilir.
+- “Demo bildirimi dene” eylemi gerçek olay geçmişine eklenmez. Canlı moddaki önizleme testleri panelde kalır; OBS'ye gerçek olay gibi gönderilmez.
+- Canlı/demo geçişinde başlangıç noktası, kuyruk ve tekrar kayıtları temizlenir; örnek veri gerçek olaylarla karışmaz. Demo doğrulaması Faz 5 canlı entegrasyonunu tamamlamaz.
 
-**Bitti sayılma şartı:** En az bir gerekli resmî veri kaynağıyla çalışan, hata durumlarını düzgün yöneten doğrulanabilir entegrasyon var.
+### Kapsam dışında
 
-**Durum:** [ ] Başlanmadı
+Üyelik, veritabanı/backend, ücretli servis, cüzdan bağlantısı, blockchain işlemi, token/NFT/ödeme, rozet claim işlemi, sohbet botu, OBS eklentisi/WebSocket kontrolü, çok kullanıcılı eşitleme, özel HTML/JS/CSS yükleme, ses dosyası yükleme, sınırsız efekt editörü ve veri dashboard/explorer özellikleri yok. OBS'ye URL'yi yayıncı elle ekler. Deploy ve başvuru Faz 7 kapsamındadır.
 
-## Faz 6 — MVP'yi küçük parçalarla tamamla
+## Faz 4 — Asgari geliştirme iskeleti
 
-**Amaç:** Sadece bilgi gösteren bir sayfa değil, kullanıcıya iş yaptıran çalışan ürün.
+**Durum:** Kullanıcı onayıyla demo sürüm uygulandı. React + TypeScript + Vite; panel, bağımsız overlay, ayar saklama/URL ve manuel demo tetikleyici mevcut. Canlı API yok. TypeScript, ESLint ve build geçti; Chromium masaüstü/mobil ve bağımsız overlay kontrolleri yapıldı. Gerçek OBS testi bekliyor.
 
-Alt görev önerisi (Faz 3'teki seçime göre uyarlanacak):
-- **6A — Temel arayüz:** net başlangıç ekranı, kullanım amacı, mobil görünüm
-- **6B — Asıl etkileşim:** ürünün gerçekten işe yarayan 1. özelliği
-- **6C — İkinci özellik:** kullanıcıya kontrol/özelleştirme veya olaylara tepki verme
-- **6D — Kullanım kolaylığı:** boş/yükleniyor/hata durumları, açıklamalar, erişilebilirlik
-- **6E — Geliştirme testi:** örnek senaryolar, edge case'ler, gerekli hata düzeltmeleri
+1. Mevcut checkout ve kullanıcı değişikliklerini koruyarak React + TypeScript + Vite iskeletini ve kilitli bağımlılıkları oluştur; `.gitignore` ekle. Mevcut izole ortamı kullan, ayrıca worktree oluşturma.
+2. `/` ve `/overlay` ekran kabuklarını, ortak yapılandırma tipini ve doğrulama sınırlarını hazırla. Statik barındırmada overlay yolunun açılması için yayınlama gereksinimini kaydet.
+3. API'den bağımsız, açık etiketli deterministik demo sağlayıcı ve en küçük önizleme akışını kur. Bu aşamada canlı endpoint uydurma.
+4. Geliştirme, lint, tür kontrolü ve build komutlarını belgele ve çalıştır. Gerekli ayar yoksa `.env.example` veya yeni paket ekleme. Resmî skill kurulumu bu görevin ön koşulu değil; yeni ağ araştırması yapılmaz.
 
-Squeek Live Companion seçilirse örnek MVP:
-- Olay veya hamster durumunu tetikleyici olarak kullanan **canlı animasyon/bildirim**
-- Kullanıcının renk/görünüm/bildirim türünü seçebildiği **kontrol ekranı**
-- OBS'ye tarayıcı kaynağı olarak eklenebilen **ayrı overlay URL'si**
+**Bitiş kanıtı:** İki ekran yerelde açıldı; demo etiketi, elle tetikleme, ayar kalıcılığı, kopyalama, ayrı tarayıcıda şeffaf overlay, geçersiz ayar kurtarma ve mobil taşma kontrol edildi. İlk mobil taşma hatası düzeltildi. TypeScript, ESLint ve üretim build başarılı. Yerel kullanım adımları README.md içinde. Henüz canlı entegrasyon veya gerçek OBS testi iddiası yok. Faz 5 başlamadı.
 
-Bu örnek özellikler ürün seçilene kadar **bağlayıcı değil**.
+## Faz 5 — Doğrulanmış veri sağlayıcı ve tetikleyici
 
-**Bitti sayılma şartı:** Kullanıcı gerçek bir senaryoyu baştan sona deneyebiliyor; seçilen ürünün temel özelliği gerçek Squeekchain verisiyle çalışıyor; test/build sonuçları gösterildi.
+**Durum:** Başlanmadı; Faz 4 sonucu ve kullanıcı onayı gerekir.
 
-**Durum:** [ ] Başlanmadı
+1. Erişilebilir resmî belgeler veya açıkça aktarılmış kaynak kaydı üzerinden gereken en az endpoint, şema, olay kimliği, veri tazeliği ve tarayıcı erişim gerekliliklerini belirle. Bilinmeyenleri engel olarak kaydet; aynı ağ engelini tekrar araştırma.
+2. Canlı sağlayıcıyı demo sağlayıcıyla ortak arayüze bağla; çalışma zamanı şema doğrulaması, büyük tamsayılar, önbellek ve hız sınırlarını uygula.
+3. En az bir doğrulanmış gerçek tetikleyiciyi bağla; başlangıç, tekrar, yeniden bağlantı, gecikmiş/unavailable ve hata durumlarını uygula.
+4. Erişim varsa temsilî canlı istek ve olay akışını doğrula. Yoksa demo ile geliştirmeyi sürdür, canlı kontrolü **çalıştırılmadı/bloke** olarak kaydet; Faz 5'i tamamlandı sayma.
+
+**Bitiş kanıtı:** Gerçek veriyle en az bir tetikleyici, şema ve hata testleri; canlı kontrol sonucu ayrı kayıtlı.
+
+## Faz 6 — Yayıncı iş akışını tamamla
+
+**Durum:** Başlanmadı; faz geçişleri kullanıcı onayına bağlı.
+
+1. **6A:** Kontrol paneli, tema/renk/konum/boyut ayarları ve ortak önizlemeyi tamamla; ayarları sürümlü sakla.
+2. **6B:** Efekt, bildirim kuyruğu, süre/minimum aralık ve tetikleyici aç/kapat davranışını tamamla. Hareket azaltma tercihini destekle; hızlı yanıp sönen efekt kullanma.
+3. **6C:** Güvenli fragment yapılandırmalı overlay URL'sini, kopyalama ve OBS yönergelerini tamamla; ayrı tarayıcı oturumunda açılmasını doğrula.
+4. **6D:** Mobil panel, klavye erişimi, şeffaf sahne, veri kaynağı/durum etiketleri ve demo/canlı geçişlerini kontrol et. Dış kaynaklı metinleri HTML olarak çalıştırma.
+5. **6E:** Tekrarlanan olay, kuyruk taşması, geçersiz URL ayarı, yenileme, API kesintisi/429 ve mod değişimi için anlamlı testler; lint/tür kontrolü/build. Gerçek OBS Browser Source testi kullanıcı ortamında yapılacak; tarayıcı önizlemesi OBS testi diye raporlanmayacak.
+
+**Bitiş kanıtı:** Yayıncı ayarı yapar, önizler, URL'yi OBS'ye ekler ve doğrulanmış gerçek olayın efektini görür. Canlı veri veya OBS testi eksikse ilgili kanıt beklemede kalır. Sonraki faza otomatik geçilmez.
 
 ## Faz 7 — Son test, yayın, doğrulama ve başvuru
 
@@ -143,17 +158,18 @@ Yapılacaklar:
 
 ---
 
-## Önemli kararlar (henüz kapanmadı)
+## Karar kaydı ve kalan doğrulamalar
 
-| Konu | Şu anki durum | Ne zaman karar verilecek? |
+| Konu | Karar / kalan iş | Faz |
 |---|---|---|
-| Kesin proje fikri | Belirsiz; Live Companion ilk aday | Faz 3 |
-| MVP özellikleri | Örnekler var, onaylanmadı | Faz 3 |
-| Teknoloji | React + TypeScript + Vite aday | Faz 3 |
-| Veritabanı / backend | Gerekli olduğu kanıtlanmadı | Faz 3–5 |
-| Domain ve DNS doğrulama | Güncel formdan doğrulanmalı | Faz 2 |
-| Squeekchain kontratları | Resmî deployment kaydından okunmalı | Faz 1 / 5 |
-| Rozetler ve erken sıra | Garanti yok; canlı profilde bakılacak | Faz 1 / 7 |
+| Ürün ve hedef kullanıcı | Squeek Live Companion; OBS kullanan yayıncı | 3 — kesinleşti |
+| MVP | Olaya tepki, ayar/önizleme paneli, bağımsız OBS overlay | 3 — kesinleşti |
+| Teknoloji | React + TypeScript + Vite; statik frontend | 3 — kesinleşti |
+| Veri saklama / eşitleme | Yerel ayarlar + OBS URL yapılandırma kopyası; backend yok | 3 — kesinleşti |
+| Gerçek tetikleyiciler | En az bir; endpoint ve alanlar resmî şemaya göre seçilecek | 5 — açık |
+| Code Lane kabul / form / domain / DNS | Kısmi bilgi; gönderimden önce doğrulanmalı | 2 / 7 — açık |
+| Tester / sözleşmeler | Ağ engeli nedeniyle ertelendi; MVP blockchain işlemi içermiyor | 1 — ertelendi |
+| Rozetler ve erken sıra | Garanti yok; güncel profil ve koşullar gerekli | 7 — açık |
 
 ## Resmî kaynaklar
 
